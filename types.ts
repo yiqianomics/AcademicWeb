@@ -1,4 +1,6 @@
 
+import React from 'react';
+
 export interface EducationItem {
   institution: string;
   degree: string;
@@ -49,6 +51,7 @@ export interface SkillCategory {
 
 export interface NewsItem {
   date: string;
-  title: string;
-  content: string;
+  title: React.ReactNode | string;
+  content: React.ReactNode | string;
+  image?: string;
 }

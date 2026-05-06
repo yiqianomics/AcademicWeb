@@ -55,7 +55,12 @@ function App() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
-                    <p className="text-slate-600 leading-relaxed">{item.content}</p>
+                    <p className="text-slate-600 leading-relaxed mb-4">{item.content}</p>
+                    {item.image && (
+                      <div className="mt-4 rounded-lg overflow-hidden border border-slate-200">
+                        <img src={item.image} alt={item.title} className="w-full h-auto object-cover max-h-96" />
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
