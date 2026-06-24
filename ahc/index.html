@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AHC and CLR Transformations for Zero-Containing Compositions</title>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)'], ['$', '$']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f0f2f7;
+  --surface: #ffffff;
+  --surface2: #f8f9fc;
+  --border: #e2e8f0;
+  --text: #1a202c;
+  --text-muted: #64748b;
+  --text-xs: #94a3b8;
+  --accent-ahc: #ea7320;
+  --accent-ahc-bg: #fff7ed;
+  --accent-ahc-border: #fed7aa;
+  --accent-clr: #7c3aed;
+  --accent-clr-bg: #f5f3ff;
+  --accent-clr-border: #ddd6fe;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --danger-text: #b91c1c;
+  --success: #16a34a;
+  --success-bg: #f0fdf4;
+  --warn: #d97706;
+  --warn-bg: #fffbeb;
+  --warn-border: #fde68a;
+  --radius-sm: 6px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.site-header {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%);
+  color: white;
+  padding: 48px 32px 40px;
+  text-align: center;
+}
+.site-header h1 {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  margin-bottom: 12px;
+}
+.site-header p {
+  font-size: 1rem;
+  opacity: 0.8;
+  max-width: 680px;
+  margin: 0 auto 20px;
+}
+.method-badges {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.badge-ahc {
+  background: rgba(234,115,32,0.2);
+  border: 1px solid rgba(234,115,32,0.5);
+  color: #fdba74;
+}
+.badge-clr {
+  background: rgba(167,139,250,0.2);
+  border: 1px solid rgba(167,139,250,0.5);
+  color: #c4b5fd;
+}
+.badge-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ── MAIN LAYOUT ── */
+.main-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-header {
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-header h2 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.card-header p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+.card-body { padding: 20px 24px; }
+
+/* ── POINTS TABLE ── */
+.controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .controls-grid { grid-template-columns: 1fr; }
+}
+
+.points-table-wrap { overflow-x: auto; }
+.points-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.points-table th {
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.points-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.points-table tr:last-child td { border-bottom: none; }
+
+.color-swatch {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1.5px rgba(0,0,0,0.15);
+  vertical-align: middle;
+}
+.pt-label {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.comp-input {
+  width: 70px;
+  padding: 5px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  color: var(--text);
+  transition: border-color 0.15s;
+  background: var(--surface2);
+}
+.comp-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+.comp-input.err { border-color: var(--danger); background: var(--danger-bg); }
+
+.sum-display {
+  font-family: 'SF Mono', 'Monaco', monospace;
+  font-size: 0.78rem;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sum-ok { background: var(--success-bg); color: var(--success); }
+.sum-warn { background: var(--danger-bg); color: var(--danger-text); }
+
+.zero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  color: var(--warn);
+  white-space: nowrap;
+}
+.zero-badge.hidden { visibility: hidden; }
+
+/* ── CLR CONTROLS ── */
+.clr-control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.eps-section {
+  background: var(--accent-clr-bg);
+  border: 1px solid var(--accent-clr-border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.eps-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent-clr);
+  text-transform: uppercase;
+  letter-spacing: 0;
+  margin-bottom: 6px;
+}
+.eps-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.eps-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.eps-label {
+  font-family: 'SF Mono', 'Monaco', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-clr);
+  white-space: nowrap;
+}
+.eps-number-input {
+  width: 90px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--accent-clr-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  color: var(--accent-clr);
+  background: white;
+  font-weight: 600;
+}
+.eps-number-input:focus {
+  outline: none;
+  border-color: var(--accent-clr);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+}
+.eps-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--accent-clr-border);
+  outline: none;
+  cursor: pointer;
+}
+.eps-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent-clr);
+  box-shadow: 0 0 0 3px white, 0 0 0 5px var(--accent-clr-border);
+  cursor: pointer;
+}
+.eps-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-xs);
+  margin-top: 4px;
+  font-family: monospace;
+}
+
+.zero-alert {
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.zero-alert.has-zeros {
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  color: #92400e;
+}
+.zero-alert.no-zeros {
+  background: var(--success-bg);
+  border: 1px solid #bbf7d0;
+  color: #14532d;
+}
+.zero-alert strong { font-weight: 700; }
+
+.eps-affected-list {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.eps-affected-item {
+  font-family: 'SF Mono', 'Monaco', monospace;
+  font-size: 0.72rem;
+  color: #92400e;
+  background: rgba(251,191,36,0.15);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+/* ── PLOTS GRID ── */
+.plots-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 1100px) {
+  .plots-grid { grid-template-columns: 1fr; }
+}
+
+.plot-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.plot-card-header {
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.plot-card-header-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.plot-card-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+.plot-card-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+
+.plot-legend {
+  display: flex;
+  gap: 14px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.legend-shape {
+  width: 10px; height: 10px;
+  border: 2px solid #888;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.legend-shape.circle { border-radius: 50%; }
+.legend-shape.diamond { transform: rotate(45deg); }
+.legend-shape.square { border-radius: 1px; }
+
+.plot-div { width: 100%; }
+
+/* ── FOOTER ── */
+.site-footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 0.78rem;
+  color: var(--text-xs);
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+/* ── RESEARCH NOTE RESTYLE ── */
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface2: #f6f7f8;
+  --surface-alt: #f6f7f8;
+  --border: #d9dee5;
+  --text: #1f2933;
+  --text-muted: #5f6b7a;
+  --text-xs: #8a94a3;
+  --text-light: #8a94a3;
+  --accent-ahc: #0f766e;
+  --accent-ahc-bg: #ecfdf5;
+  --accent-ahc-border: #99f6e4;
+  --accent-clr: #475569;
+  --accent-clr-bg: #f1f5f9;
+  --accent-clr-border: #cbd5e1;
+  --danger: #b91c1c;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --danger-text: #991b1b;
+  --success: #047857;
+  --success-bg: #ecfdf5;
+  --warn: #b45309;
+  --warn-bg: #fff7ed;
+  --warn-border: #fed7aa;
+  --warning: #b45309;
+  --warning-bg: #fff7ed;
+  --warning-border: #fed7aa;
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 8px;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.site-header {
+  background: var(--surface);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  padding: 44px 28px 34px;
+  text-align: left;
+}
+
+.header-inner {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.site-header h1 {
+  max-width: 860px;
+  font-size: clamp(1.8rem, 3vw, 2.55rem);
+  line-height: 1.14;
+  letter-spacing: 0;
+  font-weight: 720;
+  color: var(--text);
+  margin: 0 0 14px;
+}
+
+.lead {
+  max-width: 820px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+  margin: 0;
+  opacity: 1;
+}
+
+.sublead {
+  max-width: 790px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-light);
+  margin-top: 10px;
+}
+
+.main-content {
+  max-width: 1400px;
+  padding: 28px 24px 34px;
+  gap: 24px;
+}
+
+.card,
+.plot-card,
+.formula-card,
+.comparison-table {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  padding: 18px 22px 14px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.card-header h2,
+.section-heading h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.card-header p {
+  max-width: 520px;
+  margin-left: 0;
+  text-align: right;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 700px) {
+  .card-header {
+    flex-direction: column;
+  }
+  .card-header p {
+    text-align: left;
+  }
+}
+
+.controls-grid {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+
+.points-table th {
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.points-table td {
+  font-size: 0.875rem;
+}
+
+.comp-input {
+  min-height: 34px;
+  background: var(--surface);
+}
+
+.comp-input:focus {
+  border-color: var(--accent-ahc);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.sum-display,
+.zero-badge {
+  border-radius: var(--radius-sm);
+}
+
+.zero-badge {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  color: var(--warning);
+}
+
+.preset-btn {
+  min-height: 34px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.preset-btn:hover {
+  border-color: var(--accent-ahc);
+  color: var(--accent-ahc);
+  background: var(--accent-ahc-bg);
+}
+
+.preset-panel {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.preset-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.eps-section {
+  background: var(--accent-clr-bg);
+  border-color: var(--accent-clr-border);
+  border-radius: var(--radius);
+}
+
+.eps-title {
+  color: var(--accent-clr);
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 0.9rem;
+}
+
+.eps-number-input {
+  width: 112px;
+  border-color: var(--accent-clr-border);
+  color: var(--text);
+}
+
+.eps-number-input:focus {
+  border-color: var(--accent-clr);
+  box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.14);
+}
+
+.eps-slider {
+  background: var(--accent-clr-border);
+}
+
+.eps-slider::-webkit-slider-thumb {
+  background: var(--accent-clr);
+  box-shadow: 0 0 0 3px white, 0 0 0 5px var(--accent-clr-border);
+}
+
+.eps-range-labels {
+  font-size: 0.8125rem;
+}
+
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.check-row input {
+  margin-top: 3px;
+  accent-color: var(--accent-clr);
+}
+
+.zero-alert {
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+}
+
+.zero-alert.has-zeros {
+  background: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: #7c3f0a;
+}
+
+.zero-alert.no-zeros {
+  background: var(--accent-ahc-bg);
+  border-color: var(--accent-ahc-border);
+  color: #065f56;
+}
+
+.eps-affected-item {
+  color: #7c3f0a;
+  background: rgba(254, 215, 170, 0.35);
+}
+
+.plot-card-header {
+  padding: 16px 20px 14px;
+}
+
+.plot-card-title {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.plot-card-sub {
+  font-size: 0.84rem;
+}
+
+.plot-legend {
+  background: var(--surface-alt);
+}
+
+.legend-item {
+  font-size: 0.8125rem;
+}
+
+.plot-card-note {
+  padding: 10px 20px 14px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  background: var(--surface);
+}
+
+.section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section-heading {
+  max-width: 760px;
+}
+
+.section-heading p {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  margin-top: 4px;
+}
+
+.formula-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .formula-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formula-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px;
+}
+
+.formula-card.ahc-card {
+  border-top: 3px solid var(--accent-ahc);
+}
+
+.formula-card.clr-card {
+  border-top: 3px solid var(--accent-clr);
+}
+
+.formula-card h3 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.formula-card p {
+  color: var(--text-muted);
+  font-size: 0.91rem;
+}
+
+.display-math {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin: 12px 0;
+  overflow-x: auto;
+  color: var(--text);
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  font-size: 0.9rem;
+}
+
+.comparison-table th {
+  background: var(--surface-alt);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.scope-note {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  padding: 16px 18px;
+}
+
+.readout-table-wrap {
+  overflow-x: auto;
+}
+
+.readout-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.readout-table th,
+.readout-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.readout-table th {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.readout-table tr:last-child td {
+  border-bottom: none;
+}
+
+.readout-table td:not(:first-child),
+.readout-table th:not(:first-child) {
+  font-family: "SF Mono", Monaco, Consolas, monospace;
+}
+
+.site-footer {
+  background: var(--surface);
+  color: var(--text-light);
+}
+
+.site-footer a {
+  color: var(--accent-ahc);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+
+.quick-guide {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  gap: 18px;
+}
+
+.quick-guide h2 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.quick-guide ol {
+  padding-left: 20px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.quick-guide li {
+  margin-bottom: 4px;
+}
+
+.marker-key {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 1px solid var(--border);
+  padding-left: 18px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.marker-key-title {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.marker-key-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.marker-sample {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 1px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(31, 41, 51, 0.18);
+  flex: 0 0 auto;
+}
+
+.marker-sample.thin {
+  border-color: #475569;
+}
+
+.marker-sample.open {
+  background: transparent;
+  border: 2px solid #111827;
+  box-shadow: none;
+}
+
+@media (max-width: 800px) {
+  .quick-guide {
+    grid-template-columns: 1fr;
+  }
+  .marker-key {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 14px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════ HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <h1>AHC and CLR Transformations for Zero-Containing Compositions</h1>
+    <p class="lead">
+      This visualization compares the Arc-Hellinger Centered (AHC)
+      transformation, a square-root geometric transformation defined on the
+      closed simplex, with the Centered Log-Ratio (CLR) transformation, which
+      requires strictly positive components.
+    </p>
+    <p class="sublead">
+      The example uses \(p=3\) only for display because three-part compositions
+      can be plotted directly. The mathematical definitions below are written
+      for general \(p\).
+    </p>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════ MAIN -->
+<main class="main-content">
+
+  <section class="quick-guide" aria-labelledby="how-to-use-title">
+    <div>
+      <h2 id="how-to-use-title">How to use this visualization</h2>
+      <ol>
+        <li>Choose the boundary or near-zero preset.</li>
+        <li>Move the CLR zero-replacement value \(\varepsilon\).</li>
+        <li>Compare the AHC and CLR coordinates and the numerical summary.</li>
+      </ol>
+    </div>
+    <div class="marker-key" aria-label="Marker style key">
+      <div class="marker-key-title">Interior vs boundary key</div>
+      <div class="marker-key-row"><span class="marker-sample"></span><span>Filled markers: interior compositions</span></div>
+      <div class="marker-key-row"><span class="marker-sample thin"></span><span>Thin-outlined markers: near-boundary compositions</span></div>
+      <div class="marker-key-row"><span class="marker-sample open"></span><span>Outlined markers: compositions with at least one exact zero</span></div>
+    </div>
+  </section>
+
+  <!-- ── CONTROLS CARD ── -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2>Input compositions</h2>
+      </div>
+      <p>Enter nonnegative component values. Each row with positive total is normalized to sum to one before transformation. Rows with all components equal to zero are not valid compositions.</p>
+    </div>
+    <div class="card-body">
+      <div class="controls-grid">
+
+        <!-- Points table -->
+        <div>
+          <div class="points-table-wrap">
+            <table class="points-table" id="points-table">
+              <thead>
+                <tr>
+                  <th style="width:90px">Point</th>
+                  <th>π₁</th>
+                  <th>π₂</th>
+                  <th>π₃</th>
+                  <th style="width:80px">Row sum</th>
+                  <th style="width:120px">Zero component?</th>
+                </tr>
+              </thead>
+              <tbody id="points-tbody"></tbody>
+            </table>
+          </div>
+          <div class="preset-panel">
+            <div class="preset-row" aria-label="Composition presets">
+              <button class="preset-btn" type="button" onclick="applyPreset('interior')">Interior</button>
+              <button class="preset-btn" type="button" onclick="applyPreset('boundary')">Boundary</button>
+              <button class="preset-btn" type="button" onclick="applyPreset('nearZero')">Near-zero</button>
+              <button class="preset-btn" type="button" onclick="applyPreset('reset')">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CLR controls -->
+        <div class="clr-control-panel">
+          <div class="eps-section">
+            <div class="eps-title">CLR zero-replacement value ε</div>
+            <div class="eps-subtitle">CLR is undefined when any component is exactly zero. In this visualization, exact zero components are replaced by ε, the composition is renormalized, and CLR is then applied to the modified composition. Nonzero components are not thresholded or replaced.</div>
+            <div class="eps-input-row">
+              <span class="eps-label">ε =</span>
+              <input type="number" class="eps-number-input" id="eps-number"
+                min="0.000001" max="0.1" step="0.000001" value="0.001"
+                aria-label="CLR zero replacement value epsilon"
+                oninput="onEpsNumberChange(this.value)">
+            </div>
+            <input type="range" class="eps-slider" id="eps-slider"
+              min="-6" max="-1" step="0.01" value="-3"
+              aria-label="CLR zero replacement value epsilon"
+              oninput="onEpsSliderChange(this.value)">
+            <div class="eps-range-labels">
+              <span>10⁻⁶</span><span>10⁻⁵</span><span>10⁻⁴</span><span>10⁻³</span><span>10⁻²</span><span>10⁻¹</span>
+            </div>
+          </div>
+          <label class="check-row" title="Keeps the CLR axis limits fixed so movement caused by changing ε is visually comparable.">
+            <input type="checkbox" id="lock-clr-scale" checked onchange="onLockClrScaleChange(this.checked)">
+            <span>Lock CLR coordinate scale</span>
+          </label>
+          <div class="zero-alert" id="zero-alert"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PLOTS GRID ── -->
+  <div class="section-heading">
+    <h2>Transformation comparison</h2>
+    <p>Compare the direct AHC transformation with the CLR transformation after exact-zero replacement.</p>
+  </div>
+
+  <div class="plots-grid">
+
+    <!-- AHC Plot -->
+    <div class="plot-card">
+      <div class="plot-card-header">
+        <div class="plot-card-header-inner">
+          <div>
+            <div class="plot-card-title">AHC: direct transformation on the closed simplex</div>
+            <div class="plot-card-sub">\( \pi \to q=\sqrt{\pi} \to z_{\mathrm{AHC}}(\pi) \) &nbsp;·&nbsp; No zero-replacement step is required.</div>
+          </div>
+        </div>
+      </div>
+      <div class="plot-legend">
+        <div class="legend-item"><div class="legend-shape circle" style="border-color:#555"></div> Original composition π</div>
+        <div class="legend-item"><div class="legend-shape diamond" style="border-color:#555"></div> Square-root point q = √π</div>
+        <div class="legend-item"><div class="legend-shape square" style="border-color:#555"></div> AHC coordinate \(z_{\mathrm{AHC}}(\pi)\)</div>
+      </div>
+      <div class="plot-div" id="ahc-plot"></div>
+      <div class="plot-card-note">Boundary points remain finite under the AHC transformation.</div>
+    </div>
+
+    <!-- CLR Plot -->
+    <div class="plot-card">
+      <div class="plot-card-header">
+        <div class="plot-card-header-inner">
+          <div>
+            <div class="plot-card-title">CLR: transformation after zero replacement</div>
+            <div class="plot-card-sub" id="clr-subtitle">\( \pi \to r(\pi;\varepsilon) \to z_{\mathrm{CLR}}(\pi;\varepsilon) \) &nbsp;·&nbsp; Move ε to see how zero-containing points depend on the replacement value.</div>
+          </div>
+        </div>
+      </div>
+      <div class="plot-legend">
+        <div class="legend-item"><div class="legend-shape circle" style="border-color:#555"></div> Original composition π</div>
+        <div class="legend-item"><div class="legend-shape diamond" style="border-color:#555"></div> Zero-replaced composition r(π; ε)</div>
+        <div class="legend-item"><div class="legend-shape square" style="border-color:#555"></div> CLR coordinate \(z_{\mathrm{CLR}}(\pi;\varepsilon)\)</div>
+      </div>
+      <div class="plot-div" id="clr-plot"></div>
+      <div class="plot-card-note">Zero-containing points move as the replacement value ε changes.</div>
+    </div>
+
+  </div>
+
+  <!-- ── NUMERICAL SUMMARY ── -->
+  <div class="card readout-card">
+    <div class="card-header">
+      <div>
+        <h2>Coordinate norms and ε-sensitivity</h2>
+      </div>
+      <p>All norms are Euclidean norms in the transformed zero-sum coordinate space. \( \Delta_{\mathrm{CLR}}(\varepsilon)=\|z_{\mathrm{CLR}}(\pi;\varepsilon)-z_{\mathrm{CLR}}(\pi;10^{-3})\|_2 \).</p>
+    </div>
+    <div class="card-body">
+      <div class="readout-table-wrap">
+        <table class="readout-table">
+          <thead>
+            <tr>
+              <th>Point</th>
+              <th>Contains zero?</th>
+              <th>∥z<sub>AHC</sub>∥</th>
+              <th>∥z<sub>CLR</sub>(ε)∥</th>
+              <th>ΔCLR from ε = 10⁻³</th>
+            </tr>
+          </thead>
+          <tbody id="readout-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DEFINITIONS ── -->
+  <section class="section-block">
+    <div class="section-heading">
+      <h2>Mathematical definitions</h2>
+      <p>Both transformations produce zero-sum coordinates, but they have different domains before any preprocessing is applied.</p>
+    </div>
+    <div class="formula-grid">
+      <article class="formula-card ahc-card">
+        <h3>AHC transformation</h3>
+        <p>
+          For a composition \( \pi \in \Delta^{p-1} \), define
+          \( q_i=\sqrt{\pi_i} \), \( q_0=p^{-1/2}\mathbf{1} \),
+          \( c=q^\top q_0 \), and \( s=\sqrt{1-c^2} \). Then
+        </p>
+        <p class="display-math">
+          \( z_{\mathrm{AHC}}(\pi)=\frac{\arcsin(s)}{s}(q-cq_0). \)
+        </p>
+        <p>
+          The expression is interpreted by continuity when \(s=0\). This case occurs at the uniform composition, where \(q=q_0\), and the transformed coordinate is defined as \(z_{\mathrm{AHC}}(\pi)=0\). The square-root map is defined when a component is exactly zero.
+        </p>
+      </article>
+
+      <article class="formula-card clr-card">
+        <h3>CLR after zero replacement</h3>
+        <p>
+          Define the zero-replaced and renormalized composition by
+        </p>
+        <p class="display-math">
+          \[
+          \tilde{\pi}_i(\varepsilon)=
+          \begin{cases}
+          \varepsilon, & \pi_i=0,\\
+          \pi_i, & \pi_i>0,
+          \end{cases}
+          \qquad
+          r_i(\pi;\varepsilon)=
+          \frac{\tilde{\pi}_i(\varepsilon)}
+          {\sum_{j=1}^{p}\tilde{\pi}_j(\varepsilon)}.
+          \]
+        </p>
+        <p>
+          CLR is then defined by
+        </p>
+        <p class="display-math">
+          \( \operatorname{clr}(\pi)_i=\log(\pi_i)-p^{-1}\sum_{j=1}^{p}\log(\pi_j). \)
+        </p>
+        <p class="display-math">
+          \( z_{\mathrm{CLR}}(\pi;\varepsilon)=\operatorname{clr}\{r(\pi;\varepsilon)\}. \)
+        </p>
+        <p>
+          This requires \( \pi_i>0 \) for all components. When zeros are present, this visualization replaces zero components by \( \varepsilon \), renormalizes the composition, and then applies CLR. Only exact zero components are replaced in this demonstration; positive components are not thresholded.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ── COMPARISON ── -->
+  <section class="section-block">
+    <div class="section-heading">
+      <h2>Transformation-level comparison</h2>
+      <p>CLR remains a central log-ratio transformation for strictly positive compositions. The issue illustrated here is the additional zero-replacement step required when exact zeros are present.</p>
+    </div>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>AHC</th>
+          <th>CLR after zero replacement</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Domain before preprocessing</td>
+          <td>Closed simplex \( \Delta^{p-1} \)</td>
+          <td>Strictly positive simplex</td>
+        </tr>
+        <tr>
+          <td>Exact zeros</td>
+          <td>Allowed directly</td>
+          <td>Require replacement before CLR</td>
+        </tr>
+        <tr>
+          <td>Extra tuning value</td>
+          <td>None for the transformation</td>
+          <td>Requires \( \varepsilon \) or another zero-replacement rule</td>
+        </tr>
+        <tr>
+          <td>Output</td>
+          <td>Zero-sum coordinates</td>
+          <td>Zero-sum log-ratio coordinates</td>
+        </tr>
+        <tr>
+          <td>Boundary behavior</td>
+          <td>Finite for exact zeros</td>
+          <td>Log terms diverge near zero</td>
+        </tr>
+        <tr>
+          <td>Practical implication</td>
+          <td>No zero preprocessing is required</td>
+          <td>Results may depend on the replacement rule</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="scope-note">
+      This page focuses only on the transformation step. It shows that AHC can be evaluated directly for zero-containing compositions, whereas CLR requires a zero-replacement step before transformation. It does not address structural-zero identification, sampling-zero imputation, or downstream differential abundance testing.
+    </p>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  Yiqian Zhang · AHC transformation project ·
+  <a href="https://github.com/yiqianomics/AHCTransform">Source code on GitHub</a>
+  · Updated June 2026 · <span>Version: 2026-06-23</span>
+</footer>
+
+<!-- ════════════════════════════════════════════ JAVASCRIPT -->
+<script>
+'use strict';
+
+// ────────────────────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────────────────────
+const COLORS = ['#2563eb', '#b45309', '#7c3aed', '#0f766e', '#be123c'];
+const DEFAULT_EPS = 1e-3;
+const EPS_MIN = 1e-6;
+const EPS_MAX = 1e-1;
+const ZERO_TOL = 1e-12;
+const NEAR_ZERO_TOL = 0.005;
+const DEFAULT_POINTS = [
+  [0.00, 0.12, 0.88],
+  [0.12, 0.78, 0.10],
+  [0.72, 0.18, 0.10],
+  [0.28, 0.30, 0.42],
+  [0.55, 0.00, 0.45]
+];
+
+const PRESETS = {
+  reset: DEFAULT_POINTS,
+  interior: [
+    [0.50, 0.30, 0.20],
+    [0.20, 0.50, 0.30],
+    [0.30, 0.20, 0.50]
+  ],
+  boundary: [
+    [1.00, 0.00, 0.00],
+    [0.00, 1.00, 0.00],
+    [0.00, 0.00, 1.00],
+    [0.50, 0.50, 0.00]
+  ],
+  nearZero: [
+    [0.999, 0.001, 0.000],
+    [0.990, 0.009, 0.001],
+    [0.900, 0.099, 0.001]
+  ]
+};
+
+let state = {
+  points: DEFAULT_POINTS.map(row => [...row]),
+  eps: DEFAULT_EPS,
+  lockClrScale: true
+};
+
+// ────────────────────────────────────────────────────────────
+// MATH
+// ────────────────────────────────────────────────────────────
+function normalize(row) {
+  const s = row.reduce((a, b) => a + b, 0);
+  if (s <= 0) return null;
+  return row.map(x => x / s);
+}
+
+function validCompositions() {
+  return state.points
+    .map((row, index) => ({ index, row: normalize(row) }))
+    .filter(item => item.row !== null);
+}
+
+function ahcTransform(Pi) {
+  const p = 3;
+  const q0 = [1/Math.sqrt(p), 1/Math.sqrt(p), 1/Math.sqrt(p)];
+  const Q = Pi.map(row => row.map(x => Math.sqrt(Math.max(0, x))));
+  const results = Q.map(q => {
+    let c = q.reduce((s, x, j) => s + x * q0[j], 0);
+    c = Math.max(-1, Math.min(1, c));
+    const s2 = Math.max(0, 1 - c * c);
+    const sv = Math.sqrt(s2);
+    const a = sv < 1e-10 ? 1.0 : Math.asin(sv) / sv;
+    const cq = q.map((x, j) => x - c * q0[j]);
+    const Z = cq.map(x => x * a);
+    return { q, Z };
+  });
+  return {
+    Q: results.map(r => r.q),
+    Z: results.map(r => r.Z)
+  };
+}
+
+function clrTransform(Pi, eps) {
+  const Pi_pos = Pi.map(row => {
+    const r = row.map(x => (x <= ZERO_TOL) ? eps : x);
+    const s = r.reduce((a, b) => a + b, 0);
+    return r.map(x => x / s);
+  });
+  const CLR = Pi_pos.map(row => {
+    const lr = row.map(x => Math.log(x));
+    const mean = lr.reduce((a, b) => a + b, 0) / lr.length;
+    return lr.map(x => x - mean);
+  });
+  return { Pi_pos, CLR };
+}
+
+function formatEps(eps) {
+  if (eps < 1e-3) return eps.toExponential(1);
+  return Number(eps.toPrecision(3)).toString();
+}
+
+function compositionClass(row) {
+  if (row.some(x => x <= ZERO_TOL)) return 'boundary';
+  if (row.some(x => x <= NEAR_ZERO_TOL)) return 'near-zero';
+  return 'interior';
+}
+
+function formatNorm(value) {
+  return Number.isFinite(value) ? value.toFixed(3) : 'n/a';
+}
+
+// ────────────────────────────────────────────────────────────
+// GEOMETRY BUILDERS
+// ────────────────────────────────────────────────────────────
+const SV = [[1,0,0],[0,1,0],[0,0,1]]; // simplex vertices
+const B1 = [1/Math.sqrt(2), -1/Math.sqrt(2), 0];
+const B2 = [1/Math.sqrt(6),  1/Math.sqrt(6), -2/Math.sqrt(6)];
+
+function buildSimplex() {
+  const edges = [...SV, SV[0]];
+  return [
+    {
+      type:'mesh3d',
+      x:SV.map(v=>v[0]), y:SV.map(v=>v[1]), z:SV.map(v=>v[2]),
+      i:[0], j:[1], k:[2],
+      color:'#99f6e4', opacity:0.18,
+      hoverinfo:'skip', showlegend:false, name:'simplex'
+    },
+    {
+      type:'scatter3d',
+      x:edges.map(v=>v[0]), y:edges.map(v=>v[1]), z:edges.map(v=>v[2]),
+      mode:'lines', line:{color:'#94a3b8', width:6},
+      hoverinfo:'skip', showlegend:false
+    }
+  ];
+}
+
+function buildSphere() {
+  const nu = 60, nv = 30;
+  const u = Array.from({length:nu},(_,i)=>2*Math.PI*i/(nu-1));
+  const v = Array.from({length:nv},(_,i)=>Math.PI*i/(nv-1));
+  const xs = u.map(ui => v.map(vi => Math.cos(ui)*Math.sin(vi)));
+  const ys = u.map(ui => v.map(vi => Math.sin(ui)*Math.sin(vi)));
+  const zs = u.map(()  => v.map(vi => Math.cos(vi)));
+  return {
+    type:'surface',
+    x:xs, y:ys, z:zs,
+    opacity:0.07, showscale:false,
+    colorscale:[[0,'#cbd5e1'],[1,'#cbd5e1']],
+    hoverinfo:'skip', showlegend:false, name:'sphere'
+  };
+}
+
+function buildOctantArcs() {
+  const N = 120;
+  const tt = Array.from({length:N},(_,i)=>Math.PI/2*i/(N-1));
+  const mk = (xf,yf,zf) => ({
+    type:'scatter3d',
+    x:tt.map(xf), y:tt.map(yf), z:tt.map(zf),
+    mode:'lines', line:{color:'#0f766e', width:4},
+    hoverinfo:'skip', showlegend:false
+  });
+  return [
+    mk(t=>Math.cos(t), t=>Math.sin(t), ()=>0),
+    mk(t=>Math.cos(t), ()=>0,          t=>Math.sin(t)),
+    mk(()=>0,          t=>Math.cos(t), t=>Math.sin(t))
+  ];
+}
+
+function buildPlane(r, meshColor, edgeColor) {
+  const c2d = [[-r,-r],[r,-r],[r,r],[-r,r]];
+  const pts = c2d.map(([a,b]) => [
+    a*B1[0]+b*B2[0], a*B1[1]+b*B2[1], a*B1[2]+b*B2[2]
+  ]);
+  const pe = [...pts, pts[0]];
+  return [
+    {
+      type:'mesh3d',
+      x:pts.map(p=>p[0]), y:pts.map(p=>p[1]), z:pts.map(p=>p[2]),
+      i:[0,0], j:[1,2], k:[2,3],
+      color:meshColor, opacity:0.28,
+      hoverinfo:'skip', showlegend:false
+    },
+    {
+      type:'scatter3d',
+      x:pe.map(p=>p[0]), y:pe.map(p=>p[1]), z:pe.map(p=>p[2]),
+      mode:'lines', line:{color:edgeColor, width:5},
+      hoverinfo:'skip', showlegend:false
+    }
+  ];
+}
+
+function buildAxes(lim, color) {
+  const mk = (xArr, yArr, zArr) => ({
+    type:'scatter3d',
+    x:xArr, y:yArr, z:zArr,
+    mode:'lines', line:{color, width:5},
+    hoverinfo:'skip', showlegend:false
+  });
+  return [
+    mk([0,lim],[0,0],[0,0]),
+    mk([0,0],[0,lim],[0,0]),
+    mk([0,0],[0,0],[0,lim])
+  ];
+}
+
+// ────────────────────────────────────────────────────────────
+// POINT TRACES
+// ────────────────────────────────────────────────────────────
+function norm3(v) { return Math.sqrt(v.reduce((s,x)=>s+x*x,0)); }
+
+function pointsTrace(X, label, symbol, size, opacity, activeColors, compositionClasses, pointLabels) {
+  const groups = [
+    { key:'interior', symbol, markerSize:size, lineColor:'#ffffff', lineWidth:0.7 },
+    { key:'near-zero', symbol, markerSize:size, lineColor:'#475569', lineWidth:1.2 },
+    { key:'boundary', symbol:`${symbol}-open`, markerSize:size + 1, lineColor:'#111827', lineWidth:2.4 }
+  ];
+  let legendShown = false;
+  return groups.flatMap(group => {
+    const idx = compositionClasses
+      .map((klass, i) => klass === group.key ? i : -1)
+      .filter(i => i >= 0);
+    if (idx.length === 0) return [];
+    const showlegend = !legendShown;
+    legendShown = true;
+    return [{
+      type:'scatter3d',
+      x:idx.map(i => X[i][0]),
+      y:idx.map(i => X[i][1]),
+      z:idx.map(i => X[i][2]),
+      mode:'markers',
+      marker:{
+        size:group.markerSize,
+        color:idx.map(i => activeColors[i]),
+        symbol:group.symbol,
+        opacity,
+        line:{color:group.lineColor, width:group.lineWidth}
+      },
+      hovertext: idx.map(i =>
+        `${label}<br>${pointLabels[i]}<br>${compositionClasses[i]} composition<br>(${X[i][0].toFixed(4)}, ${X[i][1].toFixed(4)}, ${X[i][2].toFixed(4)})`
+      ),
+      hoverinfo:'text',
+      name:label,
+      legendgroup:label,
+      showlegend
+    }];
+  });
+}
+
+function arrowTraces(from, to, colors) {
+  const traces = [];
+  for (let i = 0; i < from.length; i++) {
+    const col = colors[i];
+    const f = from[i], t = to[i];
+    traces.push({
+      type:'scatter3d',
+      x:[f[0],t[0]], y:[f[1],t[1]], z:[f[2],t[2]],
+      mode:'lines', line:{color:col, width:4},
+      opacity:0.55, hoverinfo:'skip', showlegend:false
+    });
+    const d = [t[0]-f[0], t[1]-f[1], t[2]-f[2]];
+    const dn = norm3(d);
+    if (dn > 1e-10) {
+      const u = d.map(x=>x/dn);
+      const sz = 0.12;
+      traces.push({
+        type:'cone',
+        x:[t[0]], y:[t[1]], z:[t[2]],
+        u:[sz*u[0]], v:[sz*u[1]], w:[sz*u[2]],
+        sizemode:'absolute', sizeref:sz, anchor:'tip',
+        colorscale:[[0,col],[1,col]], showscale:false,
+        opacity:0.75, hoverinfo:'skip', showlegend:false
+      });
+    }
+  }
+  return traces;
+}
+
+function arrowTracesDash(from, to, colors) {
+  const traces = [];
+  for (let i = 0; i < from.length; i++) {
+    const col = colors[i];
+    const f = from[i], t = to[i];
+    traces.push({
+      type:'scatter3d',
+      x:[f[0],t[0]], y:[f[1],t[1]], z:[f[2],t[2]],
+      mode:'lines', line:{color:col, width:4, dash:'dash'},
+      opacity:0.55, hoverinfo:'skip', showlegend:false
+    });
+    const d = [t[0]-f[0], t[1]-f[1], t[2]-f[2]];
+    const dn = norm3(d);
+    if (dn > 1e-10) {
+      const u = d.map(x=>x/dn);
+      const sz = 0.12;
+      traces.push({
+        type:'cone',
+        x:[t[0]], y:[t[1]], z:[t[2]],
+        u:[sz*u[0]], v:[sz*u[1]], w:[sz*u[2]],
+        sizemode:'absolute', sizeref:sz, anchor:'tip',
+        colorscale:[[0,col],[1,col]], showscale:false,
+        opacity:0.75, hoverinfo:'skip', showlegend:false
+      });
+    }
+  }
+  return traces;
+}
+
+// ────────────────────────────────────────────────────────────
+// PLOT LAYOUTS
+// ────────────────────────────────────────────────────────────
+function makeLayout(title, axisRange) {
+  const ax = {
+    title:'', range:axisRange,
+    showticklabels:false, showgrid:true,
+    gridcolor:'rgba(148,163,184,0.36)', zeroline:false,
+    showbackground:true, backgroundcolor:'rgba(246,247,248,1)'
+  };
+  return {
+    autosize:true,
+    height:520,
+    paper_bgcolor:'#ffffff',
+    margin:{l:0,r:0,t:42,b:0},
+    title:{text:title, x:0.5, font:{size:14, color:'#1f2933'}},
+    legend:{x:0.02, y:0.98, bgcolor:'rgba(255,255,255,0.88)',
+      bordercolor:'rgba(217,222,229,0.95)', borderwidth:1, font:{size:12, color:'#475569'}},
+    scene:{
+      xaxis:{...ax}, yaxis:{...ax}, zaxis:{...ax},
+      aspectmode:'cube',
+      camera:{eye:{x:1.65,y:1.65,z:1.45}, center:{x:0,y:0,z:0}}
+    }
+  };
+}
+
+const plotConfig = {
+  displayModeBar:true,
+  modeBarButtonsToRemove:['toImage'],
+  responsive:true
+};
+
+// ────────────────────────────────────────────────────────────
+// RENDER AHC
+// ────────────────────────────────────────────────────────────
+function renderAHC() {
+  const valid = validCompositions();
+  const Pi = valid.map(item => item.row);
+  const activeColors = valid.map(item => COLORS[item.index]);
+  const pointLabels = valid.map(item => `Point ${item.index + 1}`);
+  if (Pi.length === 0) {
+    Plotly.react('ahc-plot', [], makeLayout('AHC: direct transformation', [-1.25, 1.25]), plotConfig);
+    return;
+  }
+  const compositionClasses = Pi.map(compositionClass);
+  const { Q, Z } = ahcTransform(Pi);
+
+  const maxZ = Math.max(...Z.map(z => norm3(z)));
+  const planeR = Math.max(maxZ, 0.5) * 2.5;
+
+  const traces = [
+    buildSphere(),
+    ...buildOctantArcs(),
+    ...buildSimplex(),
+    ...buildPlane(planeR, '#99f6e4', '#0f766e'),
+    ...buildAxes(1.6, 'rgba(95,107,122,0.72)'),
+    ...arrowTraces(Pi, Q, activeColors),
+    ...arrowTracesDash(Q, Z, activeColors),
+    pointsTrace(Pi, 'Original composition π', 'circle',  5, 0.95, activeColors, compositionClasses, pointLabels),
+    pointsTrace(Q,  'Square-root point q = √π',  'diamond', 6, 0.95, activeColors, compositionClasses, pointLabels),
+    pointsTrace(Z,  'AHC coordinate z_AHC(π)', 'square',  6, 0.95, activeColors, compositionClasses, pointLabels)
+  ].flat();
+
+  const axR = [-1.25, 1.25];
+  const layout = makeLayout('AHC: direct transformation', axR);
+  Plotly.react('ahc-plot', traces, layout, plotConfig);
+}
+
+// ────────────────────────────────────────────────────────────
+// RENDER CLR
+// ────────────────────────────────────────────────────────────
+function renderCLR() {
+  const valid = validCompositions();
+  const Pi = valid.map(item => item.row);
+  const activeColors = valid.map(item => COLORS[item.index]);
+  const pointLabels = valid.map(item => `Point ${item.index + 1}`);
+  const eps = state.eps;
+  const subtitle = document.getElementById('clr-subtitle');
+  if (Pi.length === 0) {
+    Plotly.react('clr-plot', [], makeLayout(`CLR after zero replacement (ε = ${formatEps(eps)})`, [-1.6, 1.6]), plotConfig);
+    subtitle.innerHTML =
+      `\\( \\pi \\to r(\\pi;\\varepsilon) \\to z_{\\mathrm{CLR}}(\\pi;\\varepsilon) \\) &nbsp;·&nbsp; Enter at least one row with positive total to compute CLR.`;
+    if (window.MathJax?.typesetPromise) MathJax.typesetPromise([subtitle]);
+    return;
+  }
+  const compositionClasses = Pi.map(compositionClass);
+  const { Pi_pos, CLR } = clrTransform(Pi, eps);
+  const rangeCLR = state.lockClrScale ? clrTransform(Pi, EPS_MIN).CLR : CLR;
+
+  const maxCLR = Math.max(...CLR.map(z => norm3(z)));
+  const maxRangeCLR = Math.max(maxCLR, ...rangeCLR.map(z => norm3(z)));
+  const planeR = Math.max(maxRangeCLR, 1) * 1.35;
+  const axMax = Math.max(1.6, Math.ceil(maxRangeCLR * 1.15 * 10) / 10);
+  const axR = [-axMax, axMax];
+
+  const traces = [
+    ...buildSimplex(),
+    ...buildPlane(planeR, '#cbd5e1', '#475569'),
+    ...buildAxes(axMax * 0.8, 'rgba(95,107,122,0.72)'),
+    ...arrowTraces(Pi, Pi_pos, activeColors),
+    ...arrowTracesDash(Pi_pos, CLR, activeColors),
+    pointsTrace(Pi,     'Original composition π',    'circle',  5, 0.95, activeColors, compositionClasses, pointLabels),
+    pointsTrace(Pi_pos, `Zero-replaced composition r(π; ε=${formatEps(eps)})`, 'diamond', 5, 0.75, activeColors, compositionClasses, pointLabels),
+    pointsTrace(CLR,    'CLR coordinate z_CLR(π; ε)', 'square',  6, 0.95, activeColors, compositionClasses, pointLabels)
+  ].flat();
+
+  const layout = makeLayout(`CLR after zero replacement (ε = ${formatEps(eps)})`, axR);
+  Plotly.react('clr-plot', traces, layout, plotConfig);
+
+  subtitle.innerHTML =
+    `\\( \\pi \\to r(\\pi;\\varepsilon=${formatEps(eps)}) \\to z_{\\mathrm{CLR}}(\\pi;\\varepsilon) \\) &nbsp;·&nbsp; Zero components replaced by ε, then renormalized before CLR.`;
+  if (window.MathJax?.typesetPromise) MathJax.typesetPromise([subtitle]);
+}
+
+// ────────────────────────────────────────────────────────────
+// ZERO ALERT
+// ────────────────────────────────────────────────────────────
+function updateZeroAlert() {
+  const valid = validCompositions();
+  const Pi = valid.map(item => item.row);
+  const invalid = state.points
+    .map((row, index) => ({ index, sum: row.reduce((a, b) => a + b, 0) }))
+    .filter(item => item.sum <= 0);
+  const affected = [];
+  Pi.forEach((row, i) => {
+    const zeros = row.reduce((s, x) => s + (x <= ZERO_TOL ? 1 : 0), 0);
+    if (zeros > 0) affected.push({ idx: valid[i].index + 1, row, zeros });
+  });
+  const el = document.getElementById('zero-alert');
+  if (affected.length === 0 && invalid.length === 0) {
+    el.className = 'zero-alert no-zeros';
+    el.innerHTML = `<strong>No exact zero components.</strong> CLR can be evaluated directly for these rows.`;
+  } else {
+    const parts = [];
+    if (invalid.length > 0) {
+      const rowWord = invalid.length > 1 ? 'rows have' : 'row has';
+      const invalidText = invalid.length > 1
+        ? 'These rows are not valid compositions and are omitted from the transformations.'
+        : 'This row is not a valid composition and is omitted from the transformations.';
+      parts.push(`<strong>${invalid.length} ${rowWord} all components equal to zero.</strong> ${invalidText}`);
+    }
+    if (affected.length > 0) {
+      parts.push(`<strong>${affected.length} composition${affected.length>1?'s':''} contain exact zero components.</strong> For CLR, zero components are replaced by ε = ${formatEps(state.eps)} and the row is renormalized:`);
+    }
+    let html = parts.join(' ');
+    html += affected.length > 0 ? `<div class="eps-affected-list">` : '';
+    affected.forEach(({idx, row}) => {
+      const Pi_pos = row.map(x => x <= ZERO_TOL ? state.eps : x);
+      const s = Pi_pos.reduce((a,b)=>a+b,0);
+      const norm = Pi_pos.map(x=>x/s);
+      html += `<div class="eps-affected-item">Point ${idx}: (${row.map(x=>x.toFixed(3)).join(', ')}) → (${norm.map(x=>x.toFixed(4)).join(', ')})</div>`;
+    });
+    html += affected.length > 0 ? `</div>` : '';
+    el.className = 'zero-alert has-zeros';
+    el.innerHTML = html;
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+// POINTS TABLE
+// ────────────────────────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById('points-tbody');
+  tbody.innerHTML = '';
+  state.points.forEach((pt, i) => {
+    const sum = pt.reduce((a,b)=>a+b,0);
+    const isInvalid = sum <= 0;
+    const sumOk = !isInvalid && Math.abs(sum - 1) < 0.001;
+    const hasZero = pt.some(x => x <= ZERO_TOL);
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>
+        <span class="color-swatch" style="background:${COLORS[i]}"></span>
+        <span class="pt-label" style="margin-left:6px">Point ${i+1}</span>
+      </td>
+      <td><input class="comp-input" type="number" min="0" max="1" step="0.01"
+        value="${pt[0]}" data-pt="${i}" data-dim="0" oninput="onPointInput(this)"></td>
+      <td><input class="comp-input" type="number" min="0" max="1" step="0.01"
+        value="${pt[1]}" data-pt="${i}" data-dim="1" oninput="onPointInput(this)"></td>
+      <td><input class="comp-input" type="number" min="0" max="1" step="0.01"
+        value="${pt[2]}" data-pt="${i}" data-dim="2" oninput="onPointInput(this)"></td>
+      <td><span class="sum-display ${sumOk?'sum-ok':'sum-warn'}">${sum.toFixed(3)}</span></td>
+      <td><span class="zero-badge${(hasZero || isInvalid)?'':' hidden'}">${isInvalid ? 'Invalid' : 'Boundary'}</span></td>
+      `;
+    tbody.appendChild(row);
+  });
+}
+
+function onPointInput(input) {
+  const i = parseInt(input.dataset.pt);
+  const d = parseInt(input.dataset.dim);
+  const val = parseFloat(input.value);
+  if (!isNaN(val) && val >= 0) {
+    state.points[i][d] = val;
+    updateAll();
+  }
+}
+
+function applyPreset(name) {
+  const preset = PRESETS[name];
+  if (!preset) return;
+  state.points = preset.map(row => [...row]);
+  updateAll();
+}
+
+// ────────────────────────────────────────────────────────────
+// EPS CONTROLS
+// ────────────────────────────────────────────────────────────
+function onEpsSliderChange(logVal) {
+  const eps = Math.pow(10, Number(logVal));
+  state.eps = eps;
+  document.getElementById('eps-number').value = formatEps(eps);
+  renderCLR();
+  updateZeroAlert();
+  renderReadout();
+}
+
+function onEpsNumberChange(val) {
+  if (val === '') return;
+  let eps = Number(val);
+  if (!Number.isFinite(eps)) return;
+  eps = Math.max(EPS_MIN, Math.min(EPS_MAX, eps));
+  state.eps = eps;
+  document.getElementById('eps-slider').value = Math.log10(eps).toFixed(3);
+  document.getElementById('eps-number').value = formatEps(eps);
+  renderCLR();
+  updateZeroAlert();
+  renderReadout();
+}
+
+function onLockClrScaleChange(checked) {
+  state.lockClrScale = checked;
+  renderCLR();
+}
+
+// ────────────────────────────────────────────────────────────
+// NUMERICAL READOUT
+// ────────────────────────────────────────────────────────────
+function renderReadout() {
+  const tbody = document.getElementById('readout-tbody');
+  if (!tbody) return;
+
+  const valid = validCompositions();
+  const Pi = valid.map(item => item.row);
+  if (Pi.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5">Enter at least one row with positive total to compute transformed coordinates.</td></tr>`;
+    return;
+  }
+  const { Z } = ahcTransform(Pi);
+  const { CLR } = clrTransform(Pi, state.eps);
+  const { CLR: CLRDefault } = clrTransform(Pi, DEFAULT_EPS);
+
+  tbody.innerHTML = '';
+  Pi.forEach((row, i) => {
+    const hasZero = row.some(x => x <= ZERO_TOL);
+    const deltaCLR = norm3(CLR[i].map((x, j) => x - CLRDefault[i][j]));
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>Point ${valid[i].index + 1}</td>
+      <td>${hasZero ? 'Yes' : 'No'}</td>
+      <td>${formatNorm(norm3(Z[i]))}</td>
+      <td>${formatNorm(norm3(CLR[i]))}</td>
+      <td>${formatNorm(deltaCLR)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ────────────────────────────────────────────────────────────
+// UPDATE ALL
+// ────────────────────────────────────────────────────────────
+function updateAll() {
+  renderTable();
+  updateZeroAlert();
+  renderAHC();
+  renderCLR();
+  renderReadout();
+}
+
+// ────────────────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  updateAll();
+});
+</script>
+</body>
+</html>
