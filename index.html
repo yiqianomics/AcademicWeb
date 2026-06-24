@@ -3,60 +3,1486 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Yiqian Zhang, Ph.D. student in Biostatistics at The Ohio State University. Research in microbiome data analysis, compositional data transformation, and statistical methodology."
+    />
     <title>Yiqian Zhang | Biostatistics Ph.D. Student</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: '#0f172a', // Slate 900
-              secondary: '#334155', // Slate 700
-              accent: '#0ea5e9', // Sky 500
-              paper: '#f8fafc', // Slate 50
-            },
-            fontFamily: {
-              sans: ['Inter', 'system-ui', 'sans-serif'],
-              serif: ['Merriweather', 'Georgia', 'serif'],
-            }
-          }
-        }
-      }
-    </script>
     <style>
-      /* Custom scrollbar for better aesthetics */
-      ::-webkit-scrollbar {
-        width: 8px;
+      :root {
+        --bg: #f8fafc;
+        --paper: #ffffff;
+        --ink: #0f172a;
+        --muted: #475569;
+        --soft: #e2e8f0;
+        --line: #cbd5e1;
+        --accent: #0284c7;
+        --accent-soft: #e0f2fe;
+        --success: #047857;
+        --success-bg: #d1fae5;
+        --warn: #b45309;
+        --warn-bg: #fef3c7;
+        --max: 1180px;
+        --shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
       }
-      ::-webkit-scrollbar-track {
-        background: #f1f1f1;
+
+      * {
+        box-sizing: border-box;
       }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
+
       html {
         scroll-behavior: smooth;
       }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--muted);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: var(--accent);
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      .background {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
+        background:
+          linear-gradient(180deg, rgba(248, 250, 252, 0.86), rgba(248, 250, 252, 0.74) 48%, #f8fafc),
+          radial-gradient(circle at 8% 18%, rgba(2, 132, 199, 0.12), transparent 28%),
+          radial-gradient(circle at 92% 18%, rgba(15, 23, 42, 0.08), transparent 28%);
+      }
+
+      #ambient-canvas {
+        width: 100%;
+        height: 100%;
+        opacity: 0.9;
+      }
+
+      .skip-link {
+        position: absolute;
+        top: -48px;
+        left: 16px;
+        z-index: 100;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: var(--ink);
+        color: white;
+      }
+
+      .skip-link:focus {
+        top: 16px;
+      }
+
+      .site-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        border-bottom: 1px solid transparent;
+        transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+      }
+
+      .site-nav.scrolled,
+      .site-nav.open {
+        background: rgba(255, 255, 255, 0.94);
+        border-color: rgba(226, 232, 240, 0.9);
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+        backdrop-filter: blur(18px);
+      }
+
+      .nav-inner {
+        width: min(var(--max), calc(100% - 32px));
+        min-height: 72px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .brand {
+        color: var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+
+      .brand span {
+        color: var(--accent);
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .nav-links a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+        padding: 0 12px;
+        border-radius: 8px;
+        color: #334155;
+        font-size: 0.92rem;
+        font-weight: 650;
+      }
+
+      .nav-links a:hover,
+      .nav-links a:focus-visible {
+        background: rgba(224, 242, 254, 0.62);
+        color: var(--accent);
+        outline: none;
+      }
+
+      .menu-button {
+        display: none;
+        width: 42px;
+        height: 42px;
+        border: 1px solid var(--soft);
+        border-radius: 8px;
+        background: white;
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      .menu-button span {
+        display: block;
+        width: 18px;
+        height: 2px;
+        margin: 4px auto;
+        background: currentColor;
+        transition: transform 180ms ease, opacity 180ms ease;
+      }
+
+      .site-nav.open .menu-button span:nth-child(1) {
+        transform: translateY(6px) rotate(45deg);
+      }
+
+      .site-nav.open .menu-button span:nth-child(2) {
+        opacity: 0;
+      }
+
+      .site-nav.open .menu-button span:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg);
+      }
+
+      main {
+        position: relative;
+        z-index: 1;
+      }
+
+      .section,
+      .hero {
+        width: min(var(--max), calc(100% - 32px));
+        margin: 0 auto;
+        scroll-margin-top: 104px;
+      }
+
+      .hero {
+        min-height: min(760px, 92vh);
+        display: grid;
+        grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.9fr);
+        gap: 56px;
+        align-items: center;
+        padding: 124px 0 72px;
+      }
+
+      .eyebrow {
+        margin: 0 0 18px;
+        color: var(--accent);
+        font-size: 0.82rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin-top: 0;
+      }
+
+      h1,
+      h2 {
+        color: var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        max-width: 760px;
+        margin-bottom: 16px;
+        font-size: clamp(2.75rem, 8vw, 5.8rem);
+        line-height: 0.98;
+      }
+
+      .hero-title {
+        color: #334155;
+        font-size: clamp(1.2rem, 2.6vw, 1.65rem);
+        font-weight: 700;
+      }
+
+      .summary {
+        max-width: 720px;
+        margin-bottom: 28px;
+        color: #334155;
+        font-size: 1.08rem;
+      }
+
+      .contact-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 0 0 28px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .contact-list a,
+      .contact-list span {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 6px 10px;
+        border: 1px solid rgba(203, 213, 225, 0.85);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.78);
+        color: #334155;
+        font-size: 0.95rem;
+        font-weight: 650;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        color: #1e293b;
+        font-weight: 750;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+      }
+
+      .button:hover,
+      .button:focus-visible {
+        border-color: var(--accent);
+        color: var(--accent);
+        outline: none;
+      }
+
+      .hero-visual {
+        justify-self: end;
+        width: min(100%, 340px);
+        aspect-ratio: 1;
+        position: relative;
+        border: 1px solid rgba(203, 213, 225, 0.78);
+        border-radius: 18px;
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.96)),
+          repeating-linear-gradient(45deg, transparent 0 18px, rgba(2, 132, 199, 0.05) 18px 20px);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .hero-visual::before,
+      .hero-visual::after {
+        content: "";
+        position: absolute;
+        inset: 16%;
+        border: 1px solid rgba(2, 132, 199, 0.2);
+        border-radius: 50%;
+        transform: rotate(24deg);
+      }
+
+      .hero-visual::after {
+        inset: 28%;
+        border-color: rgba(15, 23, 42, 0.15);
+        transform: rotate(-22deg);
+      }
+
+      .node-grid {
+        position: absolute;
+        inset: 52px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+      }
+
+      .node-grid i {
+        width: 12px;
+        height: 12px;
+        align-self: center;
+        justify-self: center;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 8px rgba(2, 132, 199, 0.08);
+        animation: pulse 3.4s ease-in-out infinite;
+      }
+
+      .node-grid i:nth-child(3n) {
+        background: #475569;
+        box-shadow: 0 0 0 8px rgba(71, 85, 105, 0.08);
+      }
+
+      .node-grid i:nth-child(2n) {
+        animation-delay: 0.8s;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(0.9);
+          opacity: 0.62;
+        }
+
+        50% {
+          transform: scale(1.25);
+          opacity: 1;
+        }
+      }
+
+      .section {
+        padding: 42px 0;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 24px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--soft);
+      }
+
+      .section-icon {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #e2e8f0;
+        color: #1e293b;
+        font-weight: 850;
+      }
+
+      .section-header h2 {
+        margin-bottom: 0;
+        font-size: clamp(1.55rem, 3.6vw, 2rem);
+      }
+
+      .grid {
+        display: grid;
+        gap: 22px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .card,
+      .panel {
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 12px 34px rgba(15, 23, 42, 0.045);
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      .card h3,
+      .card h4 {
+        margin-bottom: 8px;
+        color: var(--ink);
+        line-height: 1.28;
+      }
+
+      .meta {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 3px 9px;
+        border-radius: 8px;
+        background: var(--accent-soft);
+        color: #075985;
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .muted {
+        color: #64748b;
+      }
+
+      .small {
+        font-size: 0.92rem;
+      }
+
+      .plain-list {
+        margin: 14px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .plain-list li {
+        position: relative;
+        padding-left: 18px;
+        margin-top: 8px;
+      }
+
+      .plain-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.75em;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #94a3b8;
+      }
+
+      .news-card {
+        display: grid;
+        grid-template-columns: 180px minmax(0, 1fr);
+        gap: 24px;
+        border-left: 4px solid var(--accent);
+      }
+
+      .poster-frame {
+        margin-top: 18px;
+        border: 1px solid var(--soft);
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+      }
+
+      .poster-frame img {
+        width: 100%;
+        max-height: 520px;
+        object-fit: contain;
+      }
+
+      .publication-list {
+        overflow: hidden;
+      }
+
+      .publication {
+        padding: 22px 24px;
+        border-bottom: 1px solid var(--soft);
+      }
+
+      .publication:last-child {
+        border-bottom: 0;
+      }
+
+      .publication p {
+        margin-bottom: 10px;
+        color: #334155;
+      }
+
+      .publication strong {
+        color: var(--ink);
+        text-decoration: underline;
+        text-decoration-color: #cbd5e1;
+        text-underline-offset: 4px;
+      }
+
+      .publication-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 1px 9px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 850;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .tag.published {
+        border-color: #a7f3d0;
+        background: var(--success-bg);
+        color: var(--success);
+      }
+
+      .tag.review {
+        border-color: #fde68a;
+        background: var(--warn-bg);
+        color: var(--warn);
+      }
+
+      .experience {
+        position: relative;
+        padding-left: 30px;
+      }
+
+      .experience::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 999px;
+        background: #cbd5e1;
+      }
+
+      .experience:hover::before {
+        background: var(--accent);
+      }
+
+      .experience-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .experience-top h3 {
+        margin-bottom: 4px;
+      }
+
+      .details {
+        display: grid;
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .detail-row {
+        display: grid;
+        grid-template-columns: 170px minmax(0, 1fr);
+        gap: 18px;
+      }
+
+      .detail-row b {
+        color: #334155;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .detail-row p {
+        margin-bottom: 0;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 42px;
+      }
+
+      .stack {
+        display: grid;
+        gap: 18px;
+      }
+
+      .teaching-item {
+        padding: 0 0 0 16px;
+        border-left: 2px solid var(--soft);
+      }
+
+      .teaching-item + .teaching-item {
+        margin-top: 20px;
+      }
+
+      .teaching-line {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .institution {
+        display: inline-flex;
+        min-height: 22px;
+        align-items: center;
+        margin-top: 4px;
+        padding: 0 7px;
+        border-radius: 6px;
+        background: #ffedd5;
+        color: #9a3412;
+        font-size: 0.68rem;
+        font-weight: 850;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .skill-card h3 {
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--soft);
+      }
+
+      .skill-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .skill-tags span {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 3px 10px;
+        border: 1px solid var(--soft);
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 0.92rem;
+        font-weight: 650;
+      }
+
+      footer {
+        margin-top: 64px;
+        padding: 42px 0;
+        background: #0f172a;
+        color: #94a3b8;
+        text-align: center;
+      }
+
+      footer .footer-inner {
+        width: min(var(--max), calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      footer h2 {
+        margin-bottom: 4px;
+        color: white;
+        font-size: 1.3rem;
+      }
+
+      footer nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        margin: 26px 0;
+      }
+
+      footer a:hover {
+        color: white;
+      }
+
+      .copyright {
+        margin: 0;
+        padding-top: 24px;
+        border-top: 1px solid #1e293b;
+        color: #64748b;
+        font-size: 0.82rem;
+      }
+
+      @media (max-width: 980px) {
+        .hero {
+          grid-template-columns: 1fr;
+          min-height: auto;
+        }
+
+        .hero-visual {
+          justify-self: start;
+          max-width: 320px;
+        }
+
+        .grid.two,
+        .grid.three,
+        .split {
+          grid-template-columns: 1fr;
+        }
+
+        .news-card {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 840px) {
+        .menu-button {
+          display: block;
+        }
+
+        .nav-links {
+          position: absolute;
+          top: 72px;
+          left: 0;
+          right: 0;
+          display: none;
+          flex-direction: column;
+          align-items: stretch;
+          padding: 8px 16px 16px;
+          border-bottom: 1px solid var(--soft);
+          background: rgba(255, 255, 255, 0.98);
+          box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
+        }
+
+        .site-nav.open .nav-links {
+          display: flex;
+        }
+
+        .nav-links a {
+          width: 100%;
+          min-height: 46px;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .section,
+        .hero {
+          width: min(100% - 24px, var(--max));
+        }
+
+        .hero {
+          padding-top: 108px;
+          gap: 36px;
+        }
+
+        .contact-list a,
+        .contact-list span,
+        .button {
+          width: 100%;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .card,
+        .publication {
+          padding: 18px;
+        }
+
+        .experience {
+          padding-left: 20px;
+        }
+
+        .experience-top,
+        .teaching-line {
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .detail-row {
+          grid-template-columns: 1fr;
+          gap: 4px;
+        }
+      }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
-  }
-}
-</script>
-</head>
-  <body class="bg-slate-50 text-slate-900 antialiased">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <div class="background" aria-hidden="true">
+      <canvas id="ambient-canvas"></canvas>
+    </div>
+
+    <header class="site-nav" id="site-nav">
+      <div class="nav-inner">
+        <a class="brand" href="#hero">Yiqian Zhang<span>.</span></a>
+        <button class="menu-button" id="menu-button" type="button" aria-label="Open menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <nav class="nav-links" id="nav-links" aria-label="Primary navigation">
+          <a href="#hero">About</a>
+          <a href="#news">News</a>
+          <a href="#education">Education</a>
+          <a href="#publications">Publications</a>
+          <a href="#research">Research</a>
+          <a href="#teaching">Teaching</a>
+          <a href="#service">Service</a>
+          <a href="#skills">Skills</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="hero">
+        <div>
+          <p class="eyebrow">Biostatistics & Microbiome Methods</p>
+          <h1>Yiqian Zhang</h1>
+          <p class="hero-title">Ph.D. Student in Biostatistics</p>
+          <p class="summary">
+            Aspiring Biostatistician with a strong foundation in Mathematics and Statistics. Specializing in microbiome data
+            analysis, compositional data transformation, and network dynamics. Experienced in developing novel statistical
+            frameworks and computational models.
+          </p>
+          <ul class="contact-list" aria-label="Contact information">
+            <li><a href="mailto:zhang.16383@osu.edu">zhang.16383@osu.edu</a></li>
+            <li><span>+1 (217) 200-1608</span></li>
+            <li><span>Columbus, OH / Champaign, IL</span></li>
+          </ul>
+          <div class="actions" aria-label="Profile links">
+            <a class="button" href="https://www.linkedin.com/in/yiqianzhang1004/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a class="button" href="https://scholar.google.com/citations?user=681-YaUAAAAJ&amp;hl=en" target="_blank" rel="noopener noreferrer">Google Scholar</a>
+            <a class="button" href="https://orcid.org/0009-0004-0296-912X" target="_blank" rel="noopener noreferrer">ORCID</a>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="node-grid">
+            <i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="news">
+        <div class="section-header">
+          <span class="section-icon">N</span>
+          <h2>Latest News</h2>
+        </div>
+        <div class="grid">
+          <article class="card news-card">
+            <div><span class="meta">April 27, 2026</span></div>
+            <div>
+              <h3>Student Poster Presentation Award at 2026 Annual Joint Biostatistics Symposium</h3>
+              <p>
+                I am honored to receive the Student Poster Presentation Award at the 2026 Annual Joint Biostatistics
+                Symposium for my research. It is a great privilege to have my work recognized by the community!
+              </p>
+            </div>
+          </article>
+          <article class="card news-card">
+            <div><span class="meta">March 17, 2026</span></div>
+            <div>
+              <h3>
+                RAB Poster Award Winner at
+                <a href="https://stat.osu.edu/news/congratulations-2026-enar-ohio-state-student-winners" target="_blank" rel="noopener noreferrer">2026 ENAR</a>
+              </h3>
+              <p>
+                I am thrilled to announce that I am the RAB Poster Award Winner at the
+                <a href="https://stat.osu.edu/news/congratulations-2026-enar-ohio-state-student-winners" target="_blank" rel="noopener noreferrer">2026 ENAR</a>
+                Spring Meeting for my poster titled "DeSHAPE-&alpha;: Deconvolution of Quantile Structures of Heterogeneity,
+                Asymmetry, and Pattern to Advance Microbial &alpha;-Diversity Analysis".
+              </p>
+              <div class="poster-frame">
+                <img src="poster.jpg" alt="Poster for DeSHAPE alpha microbial diversity analysis" loading="lazy" />
+              </div>
+            </div>
+          </article>
+          <article class="card news-card">
+            <div><span class="meta">March 15, 2026</span></div>
+            <div>
+              <h3>ENAR 2026 Spring Meeting Presentation</h3>
+              <p>
+                I will be presenting my latest research at the ENAR 2026 Spring Meeting. Please stop by during the Sunday
+                evening Opening Mixer and Poster Session on March 15. I welcome the opportunity to discuss my work and
+                potential collaborations! Feel free to get in touch beforehand.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="education">
+        <div class="section-header">
+          <span class="section-icon">E</span>
+          <h2>Educational Experience</h2>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h3>The Ohio State University</h3>
+            <p><span class="meta">Aug 2025 - May 2030</span></p>
+            <p><strong>Ph.D. in Biostatistics</strong></p>
+            <ul class="plain-list">
+              <li>
+                Honors &amp; Awards: University Fellowship, ENGIE-Axium Incentive Recruitment Scholarship Award, Gary G.
+                Koch and Family Graduate Student Travel Award.
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>University of Illinois Urbana-Champaign</h3>
+            <p><span class="meta">Sep 2021 - May 2025</span></p>
+            <p><strong>B.S. in Statistics and Double Major in Mathematics (Applied Mathematics Concentration)</strong></p>
+            <p class="small">GPA: <strong>3.91/4.00</strong></p>
+            <ul class="plain-list">
+              <li>Honors &amp; Awards: Highest Distinction in Statistics; High Distinction in Mathematics</li>
+              <li>Dean's List: Spring 2022, Spring 2023, Spring 2024, Fall 2024</li>
+              <li>Hoover Mathematical Scholar Award</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="publications">
+        <div class="section-header">
+          <span class="section-icon">P</span>
+          <h2>Publications</h2>
+        </div>
+        <div class="panel publication-list">
+          <article class="publication">
+            <p>
+              Z. Zhu, <strong>Y. Zhang</strong>, W. Li, M. Greenacre, S. Saha, Y. Shi, and L. Zhang. "Mathematical
+              Foundations of Beta Diversity: Why Common Metrics Fail in Microbiome Analysis."
+              <em>Journal of Statistical Theory and Applications, vol. 25, issue 1, pp. 9</em>.
+            </p>
+            <div class="publication-meta">
+              <b>2026</b>
+              <span class="tag published">Published</span>
+              <a href="https://doi.org/10.1007/s44199-025-00154-7" target="_blank" rel="noopener noreferrer">DOI: 10.1007/s44199-025-00154-7</a>
+            </div>
+          </article>
+          <article class="publication">
+            <p>
+              Z. Zhu, <strong>Y. Zhang</strong>, S. Lin, and L. Zhang. "DeSHAPE: Decomposing Ecological Structure through
+              Heterogeneity, Asymmetry and Pattern Evaluation of &alpha;-Diversity." <em>Bioinformatics</em>.
+            </p>
+            <div class="publication-meta">
+              <b>2026</b>
+              <span class="tag review">Submitted</span>
+            </div>
+          </article>
+          <article class="publication">
+            <p>
+              Z. Zhu, <strong>Y. Zhang</strong>, R. Liu, W. Li, Z. Huang, X. Chen, Y. Duan, and L. Zhang*. "Koinetic: A
+              Graph-based Distance as a New Ecological Metric for Microbial Community Differential Analysis."
+              <em>Briefings in Bioinformatics</em>.
+            </p>
+            <div class="publication-meta">
+              <b>2025</b>
+              <span class="tag review">Under Revision</span>
+            </div>
+          </article>
+          <article class="publication">
+            <p>
+              <strong>Y. Zhang</strong>, J. Schluter, L. Zhang, X. Cao, R. R. Jenq, H. Feng, J. Haines, and L. Zhang.
+              "Review and Revamp of Compositional Data Transformation: A New Framework Combining Proportion Conversion and
+              Contrast Transformation." <em>Computational and Structural Biotechnology Journal, vol. 23, pp. 4088-4107</em>.
+            </p>
+            <div class="publication-meta">
+              <b>2024</b>
+              <span class="tag published">Published</span>
+              <a href="https://doi.org/10.1016/j.csbj.2024.11.003" target="_blank" rel="noopener noreferrer">DOI: 10.1016/j.csbj.2024.11.003</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="research">
+        <div class="section-header">
+          <span class="section-icon">R</span>
+          <h2>Research Experience</h2>
+        </div>
+        <div class="grid">
+          <article class="card experience">
+            <div class="experience-top">
+              <div>
+                <h3>Comprehensive Review and Methodological Advancement in Beta Diversity Measures</h3>
+                <p class="muted"><strong>Case Western Reserve University</strong></p>
+                <p class="small">Advisor(s): Dr. Zihan Zhu</p>
+              </div>
+              <span class="meta">Sep 2024 - Sep 2025</span>
+            </div>
+            <div class="details">
+              <div class="detail-row">
+                <b>Project Focus</b>
+                <p>
+                  Conducted a comprehensive review of dissimilarity measures and their mathematical properties, such as
+                  conditional negative definiteness, and evaluated their empirical performance across diverse real-world datasets.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Methodology</b>
+                <p>
+                  Systematically evaluated existing dissimilarity measures to determine which ones truly satisfy conditional
+                  negative definiteness. Employed PCoA, PERMANOVA, miRKat and rigorous simulation frameworks for thorough method
+                  validation.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Innovation</b>
+                <p>
+                  First systematically reviewed the mathematical properties of dissimilarity measures and evaluated their
+                  consequence in downstream analysis. Proposed remedial strategies for dissimilarity measures without ideal
+                  mathematical properties.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Outcome</b>
+                <p>
+                  Currently preparing a manuscript for submission to a peer-reviewed journal aimed at providing practitioners
+                  with methodological insights and enhanced tools for beta diversity analysis.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="card experience">
+            <div class="experience-top">
+              <div>
+                <h3>Microbiome Analysis for Alzheimer's Disease Pilot Study</h3>
+                <p class="muted"><strong>Case Western Reserve University</strong></p>
+                <p class="small">Advisor(s): Prof. Liangliang Zhang and Prof. Lijun Zhang</p>
+              </div>
+              <span class="meta">May 2024 - Oct 2024</span>
+            </div>
+            <p><a href="https://yiqianzhang.com/hpc_tutorial/" target="_blank" rel="noopener noreferrer">View Project &rarr;</a></p>
+            <div class="details">
+              <div class="detail-row">
+                <b>Project Focus</b>
+                <p>
+                  Investigated the role of the microbiome in Alzheimer's Disease-like phenotypes as part of the
+                  Jax.IU.Pitt Microbiome Pilot Study to identify microbiome-related factors contributing to Late Onset
+                  Alzheimer's Disease.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Methodology</b>
+                <p>
+                  Utilized QIIME 2 for microbiome data analysis, including quality control, taxonomic classification, and
+                  diversity analysis. Implemented advanced data transformation techniques to improve differential testing
+                  accuracy.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Analysis</b>
+                <p>
+                  Conducted alpha and beta diversity analyses, creating interactive visualizations to present microbial
+                  community structures. Used statistical methods to evaluate changes in diversity metrics and the impact of
+                  metadata features.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="card experience">
+            <div class="experience-top">
+              <div>
+                <h3>Review and Revamp of Microbiome Compositional Data Transformation</h3>
+                <p class="muted"><strong>Case Western Reserve University</strong></p>
+                <p class="small">Advisor(s): Prof. Liangliang Zhang</p>
+              </div>
+              <span class="meta">Nov 2023 - Dec 2024</span>
+            </div>
+            <div class="details">
+              <div class="detail-row">
+                <b>Overview</b>
+                <p>
+                  Conducted a systematic review on compositional data transformations focusing on strengths and limitations of
+                  existing techniques in microbiome data analysis.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Innovation</b>
+                <p>
+                  Developed a novel framework combining proportion conversion with contrast transformations, the CCT Framework,
+                  to enhance data handling in high zero-inflation microbiome datasets.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Methods Proposed</b>
+                <p>
+                  Proposed two new transformation methods, Centered Arcsine Contrast and Additive Arcsine Contrast,
+                  demonstrating improved performance in stabilizing variance and mitigating outlier influence.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Dual-Group Framework</b>
+                <p>
+                  Proposed a dual-group conversion framework for proportional data, specifically beneficial for two-sample
+                  testing, enhancing the power to detect differential abundance.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="card experience">
+            <div class="experience-top">
+              <div>
+                <h3>Build Computational Models of MDD and Bipolar Disorder</h3>
+                <p class="muted"><strong>Carle Health / UIUC</strong></p>
+                <p class="small">Advisor(s): Dr. Brandon Brown and Prof. Xinzhu Yu</p>
+              </div>
+              <span class="meta">Jan 2024 - Aug 2024</span>
+            </div>
+            <div class="details">
+              <div class="detail-row">
+                <b>Modeling</b>
+                <p>
+                  Created computational models that mimic mood fluctuations, specifically simulating Major Depressive Disorder
+                  (MDD) and Bipolar Disorder (BD).
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Techniques</b>
+                <p>
+                  Utilized Markov chain and Hidden Markov Models to portray mood states (normal, depressive, manic) and
+                  transitions influenced by internal/external factors.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Analysis</b>
+                <p>
+                  Conducted in-depth statistical examination to assess prevalence and trends, mirroring actual epidemiological data.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="card experience">
+            <div class="experience-top">
+              <div>
+                <h3>Develop Network Dynamics Analysis Using Preferential Attachment Models</h3>
+                <p class="muted"><strong>UIUC</strong></p>
+                <p class="small">Advisor(s): Prof. Yuguo Chen and Prof. Yuexi Wang</p>
+              </div>
+              <span class="meta">Jan 2024 - May 2024</span>
+            </div>
+            <div class="details">
+              <div class="detail-row">
+                <b>Development</b>
+                <p>
+                  Developed and simulated Preferential Attachment models to study network evolution, focusing on the
+                  "rich-get-richer" dynamic.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Implementation</b>
+                <p>
+                  Implemented simulations in Python using NetworkX for network generation and Matplotlib for visualization.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Inference</b>
+                <p>
+                  Applied Bayesian inference and Markov Chain Monte Carlo methods to estimate model parameters.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="card experience">
+            <div class="experience-top">
+              <div>
+                <h3>Rail Transportation and Engineering Center (RailTEC)</h3>
+                <p class="muted"><strong>UIUC</strong></p>
+                <p class="small">Advisor(s): Prof. Christopher P. L. Barkan</p>
+              </div>
+              <span class="meta">Oct 2023 - Aug 2024</span>
+            </div>
+            <div class="details">
+              <div class="detail-row">
+                <b>Optimization</b>
+                <p>Developed and implemented a Python script to automate the weekly Tank Car Report, enhancing team efficiency by 96%.</p>
+              </div>
+              <div class="detail-row">
+                <b>Data Analysis</b>
+                <p>Utilized Python for data management and analysis of the 25GB+ "CarList2022" dataset integrated with the "FRA" dataset.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="card experience">
+            <div class="experience-top">
+              <div>
+                <h3>Analyze War Data in Ukraine</h3>
+                <p class="muted"><strong>UIUC</strong></p>
+                <p class="small">Advisor(s): Prof. Richard B. Sowers</p>
+              </div>
+              <span class="meta">May 2023 - Jul 2023</span>
+            </div>
+            <p><a href="https://gitlab.engr.illinois.edu/r-sowers/ukraine-data" target="_blank" rel="noopener noreferrer">View Project &rarr;</a></p>
+            <div class="details">
+              <div class="detail-row">
+                <b>Pipeline</b>
+                <p>
+                  Created a data analysis pipeline in Jupyter Notebooks (Python, pandas, folium, MongoDB) to process and
+                  visualize Armed Conflict Location and Event Data.
+                </p>
+              </div>
+              <div class="detail-row">
+                <b>Visualization</b>
+                <p>
+                  Constructed choropleth maps, heatmaps, and time series animations to identify patterns and spatial-temporal dynamics.
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section split" id="teaching">
+        <div>
+          <div class="section-header">
+            <span class="section-icon">T</span>
+            <h2>Teaching Experience</h2>
+          </div>
+          <div class="card">
+            <article class="teaching-item">
+              <h3>Applied Bayesian Analysis (STAT 431)</h3>
+              <div class="teaching-line">
+                <span>Teaching Assistant</span>
+                <span class="small muted">Jan 2025 - May 2025</span>
+              </div>
+              <span class="institution">UIUC</span>
+            </article>
+            <article class="teaching-item">
+              <h3>Statistical Modeling I (STAT 425)</h3>
+              <div class="teaching-line">
+                <span>Teaching Assistant</span>
+                <span class="small muted">Aug 2024 - May 2025</span>
+              </div>
+              <span class="institution">UIUC</span>
+            </article>
+            <article class="teaching-item">
+              <h3>Statistics Programming Methods (STAT 385)</h3>
+              <div class="teaching-line">
+                <span>Teaching Assistant</span>
+                <span class="small muted">Aug 2024 - Dec 2024</span>
+              </div>
+              <span class="institution">UIUC</span>
+            </article>
+            <article class="teaching-item">
+              <h3>College Algebra (MATH 112)</h3>
+              <div class="teaching-line">
+                <span>Teaching Assistant</span>
+                <span class="small muted">Aug 2023 - May 2025</span>
+              </div>
+              <span class="institution">UIUC</span>
+            </article>
+            <article class="teaching-item">
+              <h3>Calculus &amp; Calculus I (MATH 220 &amp; 221)</h3>
+              <div class="teaching-line">
+                <span>Tutor</span>
+                <span class="small muted">Aug 2023 - Dec 2023</span>
+              </div>
+              <span class="institution">UIUC</span>
+            </article>
+          </div>
+        </div>
+
+        <div id="service">
+          <div class="section-header">
+            <span class="section-icon">S</span>
+            <h2>Service</h2>
+          </div>
+          <div class="stack">
+            <article class="card">
+              <h3>Peer Reviewer</h3>
+              <p><span class="meta">2024 - 2025</span></p>
+              <p><strong>Heliyon (Cell Press)</strong></p>
+              <ul class="plain-list">
+                <li>Completed four manuscript reviews in biostatistics/microbiome methods.</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>Treasurer</h3>
+              <p><span class="meta">Aug 2025 - Present</span></p>
+              <p><strong>Statistics &amp; Biostatistics Graduate Student Association (BSGSA), OSU</strong></p>
+              <ul class="plain-list">
+                <li>Manage organization finances, reimbursements, and event budgets; serve as banking liaison; coordinate student programming.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="skills">
+        <div class="section-header">
+          <span class="section-icon">K</span>
+          <h2>Proficiencies</h2>
+        </div>
+        <div class="grid three">
+          <article class="card skill-card">
+            <h3>Languages</h3>
+            <div class="skill-tags">
+              <span>English (Advanced)</span>
+              <span>Mandarin Chinese (Native)</span>
+            </div>
+          </article>
+          <article class="card skill-card">
+            <h3>Technical Skills</h3>
+            <div class="skill-tags">
+              <span>Python</span><span>R</span><span>SQL</span><span>Java</span><span>C++</span><span>SAS</span>
+              <span>Tableau</span><span>DESeq2</span><span>Kraken 2</span><span>QIIME 2</span><span>Git</span>
+              <span>Docker</span><span>MongoDB</span><span>HPC</span><span>LaTeX</span>
+            </div>
+          </article>
+          <article class="card skill-card">
+            <h3>Professional Competence</h3>
+            <div class="skill-tags">
+              <span>Machine Learning</span><span>Data Mining</span><span>Data Visualization</span><span>Linear Algebra</span>
+              <span>Calculus</span><span>Probability</span><span>Statistics</span><span>Web Scraping</span><span>GIS</span>
+              <span>Database Management</span>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <h2>Yiqian Zhang</h2>
+        <p>Ph.D. Student in Biostatistics | The Ohio State University</p>
+        <nav aria-label="Footer navigation">
+          <a href="#hero">Home</a>
+          <a href="#publications">Publications</a>
+          <a href="mailto:zhang.16383@osu.edu">Contact</a>
+        </nav>
+        <p class="copyright">&copy; <span id="year"></span> Yiqian Zhang. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script>
+      const siteNav = document.getElementById("site-nav");
+      const menuButton = document.getElementById("menu-button");
+      const navLinks = document.getElementById("nav-links");
+
+      const syncNav = () => {
+        siteNav.classList.toggle("scrolled", window.scrollY > 12);
+      };
+
+      menuButton.addEventListener("click", () => {
+        const open = siteNav.classList.toggle("open");
+        menuButton.setAttribute("aria-expanded", String(open));
+        menuButton.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      });
+
+      navLinks.addEventListener("click", (event) => {
+        if (event.target.tagName === "A") {
+          siteNav.classList.remove("open");
+          menuButton.setAttribute("aria-expanded", "false");
+          menuButton.setAttribute("aria-label", "Open menu");
+        }
+      });
+
+      window.addEventListener("scroll", syncNav, { passive: true });
+      syncNav();
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      const canvas = document.getElementById("ambient-canvas");
+      const context = canvas.getContext("2d");
+      const particles = [];
+      const strands = [
+        { offset: -0.22, color: "rgba(2,132,199,0.13)", amplitude: 54, speed: 0.0022 },
+        { offset: 0, color: "rgba(71,85,105,0.11)", amplitude: 72, speed: 0.0028 },
+        { offset: 0.22, color: "rgba(14,116,144,0.12)", amplitude: 46, speed: 0.0025 }
+      ];
+      let tick = 0;
+      let rafId = 0;
+
+      function resizeCanvas() {
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(window.innerWidth * ratio);
+        canvas.height = Math.floor(window.innerHeight * ratio);
+        canvas.style.width = `${window.innerWidth}px`;
+        canvas.style.height = `${window.innerHeight}px`;
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        seedParticles();
+      }
+
+      function seedParticles() {
+        particles.length = 0;
+        const diagonal = Math.hypot(window.innerWidth, window.innerHeight);
+        for (let i = 0; i < 44; i += 1) {
+          particles.push({
+            x: (Math.random() - 0.5) * diagonal * 1.35,
+            y: (Math.random() - 0.5) * diagonal * 1.35,
+            r: Math.random() * 1.8 + 1,
+            vx: (Math.random() - 0.5) * 0.34,
+            vy: (Math.random() - 0.5) * 0.42,
+            alpha: Math.random() * 0.32 + 0.16
+          });
+        }
+      }
+
+      function drawHelix(xPosition, amplitude, phase, color) {
+        const diagonal = Math.hypot(window.innerWidth, window.innerHeight);
+        const limit = diagonal / 1.3;
+        context.beginPath();
+        context.strokeStyle = color;
+        context.lineWidth = 2;
+        for (let y = -limit; y <= limit; y += 10) {
+          const x = xPosition + Math.sin(y * 0.013 + phase) * amplitude;
+          if (y === -limit) {
+            context.moveTo(x, y);
+          } else {
+            context.lineTo(x, y);
+          }
+        }
+        context.stroke();
+      }
+
+      function animate() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const diagonal = Math.hypot(width, height);
+        context.clearRect(0, 0, width, height);
+        tick += 1;
+
+        context.save();
+        context.translate(width / 2, height / 2);
+        context.rotate((50 * Math.PI) / 180);
+
+        strands.forEach((strand, index) => {
+          const x = strand.offset * diagonal;
+          const phase = tick * strand.speed + index;
+          drawHelix(x, strand.amplitude, phase, strand.color);
+          drawHelix(x, strand.amplitude, phase + Math.PI, strand.color.replace("0.13", "0.07").replace("0.12", "0.07").replace("0.11", "0.06"));
+        });
+
+        const limit = diagonal / 1.35;
+        particles.forEach((particle) => {
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+          if (particle.x < -limit) particle.x = limit;
+          if (particle.x > limit) particle.x = -limit;
+          if (particle.y < -limit) particle.y = limit;
+          if (particle.y > limit) particle.y = -limit;
+          context.beginPath();
+          context.fillStyle = `rgba(71,85,105,${particle.alpha})`;
+          context.arc(particle.x, particle.y, particle.r, 0, Math.PI * 2);
+          context.fill();
+        });
+
+        context.restore();
+        rafId = window.requestAnimationFrame(animate);
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+      animate();
+
+      window.addEventListener("pagehide", () => {
+        window.cancelAnimationFrame(rafId);
+      });
+    </script>
   </body>
 </html>
