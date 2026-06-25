@@ -956,17 +956,17 @@ body {
 <!-- ════════════════════════════════════════════ HEADER -->
 <header class="site-header">
   <div class="header-inner">
-    <h1>AHC and CLR Transformations for Zero-Containing Compositions</h1>
+    <h1>AHC and CLR transformations on zero-containing compositions</h1>
     <p class="lead">
-      This visualization compares the Arc-Hellinger Centered (AHC)
-      transformation, a square-root geometric transformation defined on the
-      closed simplex, with the Centered Log-Ratio (CLR) transformation, which
-      requires strictly positive components.
+      The Arc-Hellinger Centered (AHC) transformation maps the closed simplex
+      through a square-root geometry and stays finite at exact zeros. The
+      Centered Log-Ratio (CLR) transformation needs strictly positive
+      components, so any zero must be replaced first. The plots below show that
+      difference point by point.
     </p>
     <p class="sublead">
-      The example uses \(p=3\) only for display because three-part compositions
-      can be plotted directly. The mathematical definitions below are written
-      for general \(p\).
+      The plots fix \(p=3\), the only case that draws directly in three
+      dimensions; the definitions hold for general \(p\).
     </p>
   </div>
 </header>
@@ -976,18 +976,18 @@ body {
 
   <section class="quick-guide" aria-labelledby="how-to-use-title">
     <div>
-      <h2 id="how-to-use-title">How to use this visualization</h2>
+      <h2 id="how-to-use-title">Where to start</h2>
       <ol>
-        <li>Choose the boundary or near-zero preset.</li>
-        <li>Move the CLR zero-replacement value \(\varepsilon\).</li>
-        <li>Compare the AHC and CLR coordinates and the numerical summary.</li>
+        <li>Load the boundary or near-zero preset.</li>
+        <li>Drag \(\varepsilon\), the CLR zero-replacement value.</li>
+        <li>Watch where the AHC and CLR coordinates land, and check the norms below.</li>
       </ol>
     </div>
     <div class="marker-key" aria-label="Marker style key">
-      <div class="marker-key-title">Interior vs boundary key</div>
-      <div class="marker-key-row"><span class="marker-sample"></span><span>Filled markers: interior compositions</span></div>
-      <div class="marker-key-row"><span class="marker-sample thin"></span><span>Thin-outlined markers: near-boundary compositions</span></div>
-      <div class="marker-key-row"><span class="marker-sample open"></span><span>Outlined markers: compositions with at least one exact zero</span></div>
+      <div class="marker-key-title">What the markers mean</div>
+      <div class="marker-key-row"><span class="marker-sample"></span><span>Filled — interior composition (no component near zero)</span></div>
+      <div class="marker-key-row"><span class="marker-sample thin"></span><span>Thin outline — a component is close to zero</span></div>
+      <div class="marker-key-row"><span class="marker-sample open"></span><span>Hollow — at least one component is exactly zero</span></div>
     </div>
   </section>
 
@@ -997,7 +997,7 @@ body {
       <div>
         <h2>Input compositions</h2>
       </div>
-      <p>Enter nonnegative component values. Each row with positive total is normalized to sum to one before transformation. Rows with all components equal to zero are not valid compositions.</p>
+      <p>Enter nonnegative values. Any row with a positive total is normalized to sum to one before transforming; an all-zero row is not a valid composition.</p>
     </div>
     <div class="card-body">
       <div class="controls-grid">
@@ -1033,7 +1033,7 @@ body {
         <div class="clr-control-panel">
           <div class="eps-section">
             <div class="eps-title">CLR zero-replacement value ε</div>
-            <div class="eps-subtitle">CLR is undefined when any component is exactly zero. In this visualization, exact zero components are replaced by ε, the composition is renormalized, and CLR is then applied to the modified composition. Nonzero components are not thresholded or replaced.</div>
+            <div class="eps-subtitle">CLR is undefined when a component is exactly zero. Each zero is set to ε, the row is renormalized, and CLR is applied to the result. Positive components are left as they are — nothing is thresholded.</div>
             <div class="eps-input-row">
               <span class="eps-label">ε =</span>
               <input type="number" class="eps-number-input" id="eps-number"
@@ -1063,7 +1063,7 @@ body {
   <!-- ── PLOTS GRID ── -->
   <div class="section-heading">
     <h2>Transformation comparison</h2>
-    <p>Compare the direct AHC transformation with the CLR transformation after exact-zero replacement.</p>
+    <p>The same points under each transformation — AHC applied directly, CLR applied after exact zeros are replaced.</p>
   </div>
 
   <div class="plots-grid">
@@ -1074,7 +1074,7 @@ body {
         <div class="plot-card-header-inner">
           <div>
             <div class="plot-card-title">AHC: direct transformation on the closed simplex</div>
-            <div class="plot-card-sub">\( \pi \to q=\sqrt{\pi} \to z_{\mathrm{AHC}}(\pi) \) &nbsp;·&nbsp; No zero-replacement step is required.</div>
+            <div class="plot-card-sub">\( \pi \to q=\sqrt{\pi} \to z_{\mathrm{AHC}}(\pi) \) &nbsp;·&nbsp; No zero replacement needed.</div>
           </div>
         </div>
       </div>
@@ -1084,7 +1084,7 @@ body {
         <div class="legend-item"><div class="legend-shape square" style="border-color:#555"></div> AHC coordinate \(z_{\mathrm{AHC}}(\pi)\)</div>
       </div>
       <div class="plot-div" id="ahc-plot"></div>
-      <div class="plot-card-note">Boundary points remain finite under the AHC transformation.</div>
+      <div class="plot-card-note">Points with exact zeros stay finite.</div>
     </div>
 
     <!-- CLR Plot -->
@@ -1103,7 +1103,7 @@ body {
         <div class="legend-item"><div class="legend-shape square" style="border-color:#555"></div> CLR coordinate \(z_{\mathrm{CLR}}(\pi;\varepsilon)\)</div>
       </div>
       <div class="plot-div" id="clr-plot"></div>
-      <div class="plot-card-note">Zero-containing points move as the replacement value ε changes.</div>
+      <div class="plot-card-note">Points containing a zero move as ε changes.</div>
     </div>
 
   </div>
@@ -1114,7 +1114,7 @@ body {
       <div>
         <h2>Coordinate norms and ε-sensitivity</h2>
       </div>
-      <p>All norms are Euclidean norms in the transformed zero-sum coordinate space. \( \Delta_{\mathrm{CLR}}(\varepsilon)=\|z_{\mathrm{CLR}}(\pi;\varepsilon)-z_{\mathrm{CLR}}(\pi;10^{-3})\|_2 \).</p>
+      <p>Norms are Euclidean, taken in the transformed zero-sum coordinate space. \( \Delta_{\mathrm{CLR}}(\varepsilon)=\|z_{\mathrm{CLR}}(\pi;\varepsilon)-z_{\mathrm{CLR}}(\pi;10^{-3})\|_2 \) measures how far a point drifts from its position at \( \varepsilon=10^{-3} \).</p>
     </div>
     <div class="card-body">
       <div class="readout-table-wrap">
@@ -1138,7 +1138,7 @@ body {
   <section class="section-block">
     <div class="section-heading">
       <h2>Mathematical definitions</h2>
-      <p>Both transformations produce zero-sum coordinates, but they have different domains before any preprocessing is applied.</p>
+      <p>Both transformations produce zero-sum coordinates, but they start from different domains.</p>
     </div>
     <div class="formula-grid">
       <article class="formula-card ahc-card">
@@ -1152,7 +1152,7 @@ body {
           \( z_{\mathrm{AHC}}(\pi)=\frac{\arcsin(s)}{s}(q-cq_0). \)
         </p>
         <p>
-          The expression is interpreted by continuity when \(s=0\). This case occurs at the uniform composition, where \(q=q_0\), and the transformed coordinate is defined as \(z_{\mathrm{AHC}}(\pi)=0\). The square-root map is defined when a component is exactly zero.
+          When \(s=0\) the factor \(\arcsin(s)/s\) is read at its limit of \(1\). That happens only at the uniform composition, where \(q=q_0\) and \(z_{\mathrm{AHC}}(\pi)=0\). Because the square root is finite at zero, the map applies to compositions with exact zeros without any preprocessing.
         </p>
       </article>
 
@@ -1184,7 +1184,7 @@ body {
           \( z_{\mathrm{CLR}}(\pi;\varepsilon)=\operatorname{clr}\{r(\pi;\varepsilon)\}. \)
         </p>
         <p>
-          This requires \( \pi_i>0 \) for all components. When zeros are present, this visualization replaces zero components by \( \varepsilon \), renormalizes the composition, and then applies CLR. Only exact zero components are replaced in this demonstration; positive components are not thresholded.
+          The logarithm forces \( \pi_i>0 \) for every component, so a raw zero has no image. The replacement \( r(\pi;\varepsilon) \) above is what keeps the logs finite; components that were already positive pass through unchanged.
         </p>
       </article>
     </div>
@@ -1193,8 +1193,8 @@ body {
   <!-- ── COMPARISON ── -->
   <section class="section-block">
     <div class="section-heading">
-      <h2>Transformation-level comparison</h2>
-      <p>CLR remains a central log-ratio transformation for strictly positive compositions. The issue illustrated here is the additional zero-replacement step required when exact zeros are present.</p>
+      <h2>Where the two methods differ</h2>
+      <p>CLR is a standard log-ratio transformation on strictly positive compositions; the point here is narrower — the extra zero-replacement step it needs once exact zeros appear.</p>
     </div>
     <table class="comparison-table">
       <thead>
@@ -1237,17 +1237,12 @@ body {
         </tr>
       </tbody>
     </table>
-    <p class="scope-note">
-      This page focuses only on the transformation step. It shows that AHC can be evaluated directly for zero-containing compositions, whereas CLR requires a zero-replacement step before transformation. It does not address structural-zero identification, sampling-zero imputation, or downstream differential abundance testing.
-    </p>
   </section>
 
 </main>
 
 <footer class="site-footer">
-  Yiqian Zhang · AHC transformation project ·
-  <a href="https://github.com/yiqianomics/AHCTransform">Source code on GitHub</a>
-  · Updated June 2026 · <span>Version: 2026-06-23</span>
+  Yiqian Zhang · Updated June 2026 · <span>Version: 2026-06-23</span>
 </footer>
 
 <!-- ════════════════════════════════════════════ JAVASCRIPT -->
@@ -1257,7 +1252,7 @@ body {
 // ────────────────────────────────────────────────────────────
 // STATE
 // ────────────────────────────────────────────────────────────
-const COLORS = ['#2563eb', '#b45309', '#7c3aed', '#0f766e', '#be123c'];
+const COLORS = ['#3f6f76', '#69b7ce', '#c65840', '#f4ce4b', '#62496f'];
 const DEFAULT_EPS = 1e-3;
 const EPS_MIN = 1e-6;
 const EPS_MAX = 1e-1;
@@ -1560,25 +1555,40 @@ function arrowTracesDash(from, to, colors) {
 // ────────────────────────────────────────────────────────────
 // PLOT LAYOUTS
 // ────────────────────────────────────────────────────────────
-function makeLayout(title, axisRange) {
+// Per-figure framing knobs.
+//   eye      : camera position (x,y,z). Smaller magnitude = closer = bigger.
+//              The camera sits ~37° above horizontal and is swung toward the
+//              π₁ vertex (x ≫ y), so each figure reads as a 3/4 view with the
+//              geometry offset to one side. Lower z = lower, more grazing
+//              angle; raise z toward x for a more top-down look.
+//   domainX  : horizontal slice of the frame the scene occupies, in [0,1].
+const AHC_VIEW = { eye:{x:1.14, y:0.37, z:0.90}, domainX:[0, 1] };
+// CLR camera pulled ~2.5× closer than before so the geometry renders ~2.5× larger
+// (same 37° angle and corner swing — each component is the previous CLR eye / 2.5).
+const CLR_VIEW = { eye:{x:0.256, y:0.084, z:0.204}, domainX:[0, 1] };
+
+function makeLayout(title, axisRange, view = {}) {
   const ax = {
     title:'', range:axisRange,
     showticklabels:false, showgrid:true,
     gridcolor:'rgba(148,163,184,0.36)', zeroline:false,
     showbackground:true, backgroundcolor:'rgba(246,247,248,1)'
   };
+  const eye = view.eye || {x:1.05, y:1.05, z:0.26};
+  const domainX = view.domainX || [0, 1];
   return {
     autosize:true,
-    height:520,
+    height:640,
     paper_bgcolor:'#ffffff',
     margin:{l:0,r:0,t:42,b:0},
+    showlegend:false,
     title:{text:title, x:0.5, font:{size:14, color:'#1f2933'}},
-    legend:{x:0.02, y:0.98, bgcolor:'rgba(255,255,255,0.88)',
-      bordercolor:'rgba(217,222,229,0.95)', borderwidth:1, font:{size:12, color:'#475569'}},
     scene:{
+      uirevision:'keep-camera',
+      domain:{x:domainX, y:[0, 1]},
       xaxis:{...ax}, yaxis:{...ax}, zaxis:{...ax},
       aspectmode:'cube',
-      camera:{eye:{x:1.65,y:1.65,z:1.45}, center:{x:0,y:0,z:0}}
+      camera:{eye, center:{x:0,y:0,z:0}}
     }
   };
 }
@@ -1598,7 +1608,7 @@ function renderAHC() {
   const activeColors = valid.map(item => COLORS[item.index]);
   const pointLabels = valid.map(item => `Point ${item.index + 1}`);
   if (Pi.length === 0) {
-    Plotly.react('ahc-plot', [], makeLayout('AHC: direct transformation', [-1.25, 1.25]), plotConfig);
+    Plotly.react('ahc-plot', [], makeLayout('AHC: direct transformation', [-1.25, 1.25], AHC_VIEW), plotConfig);
     return;
   }
   const compositionClasses = Pi.map(compositionClass);
@@ -1621,7 +1631,7 @@ function renderAHC() {
   ].flat();
 
   const axR = [-1.25, 1.25];
-  const layout = makeLayout('AHC: direct transformation', axR);
+  const layout = makeLayout('AHC: direct transformation', axR, AHC_VIEW);
   Plotly.react('ahc-plot', traces, layout, plotConfig);
 }
 
@@ -1636,9 +1646,9 @@ function renderCLR() {
   const eps = state.eps;
   const subtitle = document.getElementById('clr-subtitle');
   if (Pi.length === 0) {
-    Plotly.react('clr-plot', [], makeLayout(`CLR after zero replacement (ε = ${formatEps(eps)})`, [-1.6, 1.6]), plotConfig);
+    Plotly.react('clr-plot', [], makeLayout(`CLR after zero replacement (ε = ${formatEps(eps)})`, [-1.6, 1.6], CLR_VIEW), plotConfig);
     subtitle.innerHTML =
-      `\\( \\pi \\to r(\\pi;\\varepsilon) \\to z_{\\mathrm{CLR}}(\\pi;\\varepsilon) \\) &nbsp;·&nbsp; Enter at least one row with positive total to compute CLR.`;
+      `\\( \\pi \\to r(\\pi;\\varepsilon) \\to z_{\\mathrm{CLR}}(\\pi;\\varepsilon) \\) &nbsp;·&nbsp; Enter at least one row with a positive total to draw CLR.`;
     if (window.MathJax?.typesetPromise) MathJax.typesetPromise([subtitle]);
     return;
   }
@@ -1663,7 +1673,7 @@ function renderCLR() {
     pointsTrace(CLR,    'CLR coordinate z_CLR(π; ε)', 'square',  6, 0.95, activeColors, compositionClasses, pointLabels)
   ].flat();
 
-  const layout = makeLayout(`CLR after zero replacement (ε = ${formatEps(eps)})`, axR);
+  const layout = makeLayout(`CLR after zero replacement (ε = ${formatEps(eps)})`, axR, CLR_VIEW);
   Plotly.react('clr-plot', traces, layout, plotConfig);
 
   subtitle.innerHTML =
@@ -1802,7 +1812,7 @@ function renderReadout() {
   const valid = validCompositions();
   const Pi = valid.map(item => item.row);
   if (Pi.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5">Enter at least one row with positive total to compute transformed coordinates.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5">Enter at least one row with a positive total to compute transformed coordinates.</td></tr>`;
     return;
   }
   const { Z } = ahcTransform(Pi);
