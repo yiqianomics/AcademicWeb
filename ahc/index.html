@@ -178,6 +178,13 @@ body {
 }
 .points-table tr:last-child td { border-bottom: none; }
 
+.abundance-cell {
+  font-family: 'SF Mono', 'Monaco', Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .color-swatch {
   width: 14px; height: 14px;
   border-radius: 50%;
@@ -265,6 +272,42 @@ body {
   margin-bottom: 14px;
   line-height: 1.5;
 }
+.eps-mode-row {
+  display: inline-flex;
+  margin-bottom: 12px;
+  border: 1px solid var(--accent-clr-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.eps-mode-btn {
+  border: none;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.eps-mode-btn + .eps-mode-btn { border-left: 1px solid var(--accent-clr-border); }
+.eps-mode-btn:hover { color: var(--accent-clr); }
+.eps-mode-btn.active {
+  background: var(--accent-clr);
+  color: #ffffff;
+}
+
+.eps-warning {
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
+}
+.eps-warning.hidden { display: none; }
+.eps-warning strong { font-weight: 700; }
+
 .eps-input-row {
   display: flex;
   align-items: center;
@@ -654,24 +697,6 @@ body {
   font-size: 0.8125rem;
 }
 
-.check-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  line-height: 1.45;
-}
-
-.check-row input {
-  margin-top: 3px;
-  accent-color: var(--accent-clr);
-}
-
 .zero-alert {
   border-radius: var(--radius-sm);
   font-size: 0.8125rem;
@@ -814,17 +839,6 @@ body {
   border-bottom: none;
 }
 
-.scope-note {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  color: var(--text-muted);
-  font-size: 0.92rem;
-  line-height: 1.65;
-  padding: 16px 18px;
-}
-
 .readout-table-wrap {
   overflow-x: auto;
 }
@@ -958,11 +972,13 @@ body {
   <div class="header-inner">
     <h1>AHC and CLR transformations on zero-containing compositions</h1>
     <p class="lead">
-      The Arc-Hellinger Centered (AHC) transformation maps the closed simplex
-      through a square-root geometry and stays finite at exact zeros. The
-      Centered Log-Ratio (CLR) transformation needs strictly positive
-      components, so any zero must be replaced first. The plots below show that
-      difference point by point.
+      Compositional data usually arrive as counts. Each sample's counts \(n\)
+      are normalized to a relative abundance \(\pi_i = n_i/\sum_j n_j\), and the
+      transformations act on \(\pi\). The Arc-Hellinger Centered (AHC)
+      transformation maps the closed simplex through a square-root geometry and
+      stays finite at exact zeros. The Centered Log-Ratio (CLR) transformation
+      needs strictly positive components, so any zero must be replaced first.
+      The plots below show that difference point by point.
     </p>
     <p class="sublead">
       The plots fix \(p=3\), the only case that draws directly in three
@@ -979,7 +995,7 @@ body {
       <h2 id="how-to-use-title">Where to start</h2>
       <ol>
         <li>Load the boundary or near-zero preset.</li>
-        <li>Drag \(\varepsilon\), the CLR zero-replacement value.</li>
+        <li>Pick the ε scale (counts or abundance), then drag \(\varepsilon\).</li>
         <li>Watch where the AHC and CLR coordinates land, and check the norms below.</li>
       </ol>
     </div>
@@ -995,9 +1011,9 @@ body {
   <div class="card">
     <div class="card-header">
       <div>
-        <h2>Input compositions</h2>
+        <h2>Input counts</h2>
       </div>
-      <p>Enter nonnegative values. Any row with a positive total is normalized to sum to one before transforming; an all-zero row is not a valid composition.</p>
+      <p>Enter nonnegative integer counts. Each row is divided by its total to give the relative abundance shown beside it, and that abundance is what the transformations use. A row of all zeros has no total and is skipped.</p>
     </div>
     <div class="card-body">
       <div class="controls-grid">
@@ -1008,12 +1024,13 @@ body {
             <table class="points-table" id="points-table">
               <thead>
                 <tr>
-                  <th style="width:90px">Point</th>
-                  <th>π₁</th>
-                  <th>π₂</th>
-                  <th>π₃</th>
-                  <th style="width:80px">Row sum</th>
-                  <th style="width:120px">Zero component?</th>
+                  <th style="width:80px">Point</th>
+                  <th>n₁</th>
+                  <th>n₂</th>
+                  <th>n₃</th>
+                  <th style="width:64px">Total</th>
+                  <th style="width:150px">Relative abundance π = n / total</th>
+                  <th style="width:96px">Zero count?</th>
                 </tr>
               </thead>
               <tbody id="points-tbody"></tbody>
@@ -1033,7 +1050,13 @@ body {
         <div class="clr-control-panel">
           <div class="eps-section">
             <div class="eps-title">CLR zero-replacement value ε</div>
-            <div class="eps-subtitle">CLR is undefined when a component is exactly zero. Each zero is set to ε, the row is renormalized, and CLR is applied to the result. Positive components are left as they are — nothing is thresholded.</div>
+            <div class="eps-mode-row" role="radiogroup" aria-label="Apply epsilon on relative abundance or absolute counts">
+              <button type="button" class="eps-mode-btn active" id="eps-mode-relative"
+                role="radio" aria-checked="true" onclick="onEpsModeChange('relative')">Relative abundance</button>
+              <button type="button" class="eps-mode-btn" id="eps-mode-absolute"
+                role="radio" aria-checked="false" onclick="onEpsModeChange('absolute')">Absolute counts</button>
+            </div>
+            <div class="eps-subtitle" id="eps-subtitle-text">CLR is undefined when an abundance is exactly zero. Each zero abundance is set to ε, the row is renormalized, and CLR is applied. ε is a fraction of the total; positive components are untouched.</div>
             <div class="eps-input-row">
               <span class="eps-label">ε =</span>
               <input type="number" class="eps-number-input" id="eps-number"
@@ -1045,14 +1068,11 @@ body {
               min="-6" max="-1" step="0.01" value="-3"
               aria-label="CLR zero replacement value epsilon"
               oninput="onEpsSliderChange(this.value)">
-            <div class="eps-range-labels">
+            <div class="eps-range-labels" id="eps-range-labels">
               <span>10⁻⁶</span><span>10⁻⁵</span><span>10⁻⁴</span><span>10⁻³</span><span>10⁻²</span><span>10⁻¹</span>
             </div>
           </div>
-          <label class="check-row" title="Keeps the CLR axis limits fixed so movement caused by changing ε is visually comparable.">
-            <input type="checkbox" id="lock-clr-scale" checked onchange="onLockClrScaleChange(this.checked)">
-            <span>Lock CLR coordinate scale</span>
-          </label>
+          <div class="eps-warning hidden" id="eps-warning" role="alert"></div>
           <div class="zero-alert" id="zero-alert"></div>
         </div>
 
@@ -1114,7 +1134,7 @@ body {
       <div>
         <h2>Coordinate norms and ε-sensitivity</h2>
       </div>
-      <p>Norms are Euclidean, taken in the transformed zero-sum coordinate space. \( \Delta_{\mathrm{CLR}}(\varepsilon)=\|z_{\mathrm{CLR}}(\pi;\varepsilon)-z_{\mathrm{CLR}}(\pi;10^{-3})\|_2 \) measures how far a point drifts from its position at \( \varepsilon=10^{-3} \).</p>
+      <p>Norms are Euclidean, in the zero-sum coordinate space. ΔCLR is \( \|z_{\mathrm{CLR}}(\pi;\varepsilon)-z_{\mathrm{CLR}}(\pi;\varepsilon_0)\|_2 \), the distance between a point's CLR coordinate at the current ε and at the baseline \( \varepsilon_0 \) (each mode's default), so it shows how sensitive that point is to the replacement value.</p>
     </div>
     <div class="card-body">
       <div class="readout-table-wrap">
@@ -1125,7 +1145,7 @@ body {
               <th>Contains zero?</th>
               <th>∥z<sub>AHC</sub>∥</th>
               <th>∥z<sub>CLR</sub>(ε)∥</th>
-              <th>ΔCLR from ε = 10⁻³</th>
+              <th>ΔCLR vs default ε</th>
             </tr>
           </thead>
           <tbody id="readout-tbody"></tbody>
@@ -1159,7 +1179,8 @@ body {
       <article class="formula-card clr-card">
         <h3>CLR after zero replacement</h3>
         <p>
-          Define the zero-replaced and renormalized composition by
+          On the <strong>relative abundance</strong>, replace a zero by \(\varepsilon\)
+          and renormalize:
         </p>
         <p class="display-math">
           \[
@@ -1185,6 +1206,13 @@ body {
         </p>
         <p>
           The logarithm forces \( \pi_i>0 \) for every component, so a raw zero has no image. The replacement \( r(\pi;\varepsilon) \) above is what keeps the logs finite; components that were already positive pass through unchanged.
+        </p>
+        <p>
+          The ε-scale selector also offers the <strong>count</strong> form: starting
+          from counts \(n\), put a pseudocount in place of a zero,
+          \( \tilde{n}_i=\varepsilon \) if \( n_i=0 \) else \( n_i \), then
+          \( r_i=\tilde{n}_i/\sum_j \tilde{n}_j \). Here \(\varepsilon\) is in count
+          units, so its effect depends on the sample's total \( \sum_j n_j \).
         </p>
       </article>
     </div>
@@ -1254,42 +1282,60 @@ body {
 // ────────────────────────────────────────────────────────────
 const COLORS = ['#3f6f76', '#69b7ce', '#c65840', '#f4ce4b', '#62496f'];
 const DEFAULT_EPS = 1e-3;
-const EPS_MIN = 1e-6;
-const EPS_MAX = 1e-1;
 const ZERO_TOL = 1e-12;
 const NEAR_ZERO_TOL = 0.005;
+
+// ε-scale modes for the CLR zero replacement.
+//   relative : ε replaces a zero *relative abundance*, then the row is
+//              renormalized (ε is a fraction of the total).
+//   absolute : ε is a *count* pseudocount put in place of a zero count before
+//              normalizing, so its effect scales with the sample's depth.
+const EPS_MODES = {
+  relative: {
+    min: 1e-6, max: 1e-1, default: 1e-3,
+    sliderMin: -6, sliderMax: -1, step: 1e-6,
+    labels: ['10⁻⁶','10⁻⁵','10⁻⁴','10⁻³','10⁻²','10⁻¹']
+  },
+  absolute: {
+    min: 1e-3, max: 2, default: 0.5,
+    sliderMin: -3, sliderMax: Math.log10(2), step: 1e-3,
+    labels: ['0.001','0.01','0.1','1','2']
+  }
+};
+// Inputs are raw counts. normalize() divides each row by its total to get the
+// relative abundance the transformations act on, so the pipeline is unchanged.
 const DEFAULT_POINTS = [
-  [0.00, 0.12, 0.88],
-  [0.12, 0.78, 0.10],
-  [0.72, 0.18, 0.10],
-  [0.28, 0.30, 0.42],
-  [0.55, 0.00, 0.45]
+  [  0,  12,  88],
+  [ 12,  78,  10],
+  [ 72,  18,  10],
+  [ 28,  30,  42],
+  [ 55,   0,  45]
 ];
 
 const PRESETS = {
   reset: DEFAULT_POINTS,
   interior: [
-    [0.50, 0.30, 0.20],
-    [0.20, 0.50, 0.30],
-    [0.30, 0.20, 0.50]
+    [ 50,  30,  20],
+    [ 20,  50,  30],
+    [ 30,  20,  50]
   ],
   boundary: [
-    [1.00, 0.00, 0.00],
-    [0.00, 1.00, 0.00],
-    [0.00, 0.00, 1.00],
-    [0.50, 0.50, 0.00]
+    [100,   0,   0],
+    [  0, 100,   0],
+    [  0,   0, 100],
+    [ 50,  50,   0]
   ],
   nearZero: [
-    [0.999, 0.001, 0.000],
-    [0.990, 0.009, 0.001],
-    [0.900, 0.099, 0.001]
+    [999,   1,   0],
+    [990,   9,   1],
+    [900,  99,   1]
   ]
 };
 
 let state = {
   points: DEFAULT_POINTS.map(row => [...row]),
   eps: DEFAULT_EPS,
-  lockClrScale: true
+  epsMode: 'relative'
 };
 
 // ────────────────────────────────────────────────────────────
@@ -1303,7 +1349,7 @@ function normalize(row) {
 
 function validCompositions() {
   return state.points
-    .map((row, index) => ({ index, row: normalize(row) }))
+    .map((row, index) => ({ index, counts: row, row: normalize(row) }))
     .filter(item => item.row !== null);
 }
 
@@ -1327,12 +1373,24 @@ function ahcTransform(Pi) {
   };
 }
 
-function clrTransform(Pi, eps) {
-  const Pi_pos = Pi.map(row => {
-    const r = row.map(x => (x <= ZERO_TOL) ? eps : x);
-    const s = r.reduce((a, b) => a + b, 0);
-    return r.map(x => x / s);
-  });
+// Composition r(π;ε) actually fed to CLR, for one row of counts.
+function zeroReplacedComposition(counts, eps, mode) {
+  let r;
+  if (mode === 'absolute') {
+    // Pseudocount: a zero count becomes ε counts, then normalize.
+    r = counts.map(x => (x <= ZERO_TOL) ? eps : x);
+  } else {
+    // Relative: normalize to abundance, replace a zero by ε, renormalize.
+    const s0 = counts.reduce((a, b) => a + b, 0);
+    const pi = s0 > 0 ? counts.map(x => x / s0) : counts.slice();
+    r = pi.map(x => (x <= ZERO_TOL) ? eps : x);
+  }
+  const s = r.reduce((a, b) => a + b, 0);
+  return r.map(x => x / s);
+}
+
+function clrTransform(countRows, eps, mode) {
+  const Pi_pos = countRows.map(c => zeroReplacedComposition(c, eps, mode));
   const CLR = Pi_pos.map(row => {
     const lr = row.map(x => Math.log(x));
     const mean = lr.reduce((a, b) => a + b, 0) / lr.length;
@@ -1652,9 +1710,13 @@ function renderCLR() {
     if (window.MathJax?.typesetPromise) MathJax.typesetPromise([subtitle]);
     return;
   }
+  const counts = valid.map(item => item.counts);
   const compositionClasses = Pi.map(compositionClass);
-  const { Pi_pos, CLR } = clrTransform(Pi, eps);
-  const rangeCLR = state.lockClrScale ? clrTransform(Pi, EPS_MIN).CLR : CLR;
+  const { Pi_pos, CLR } = clrTransform(counts, eps, state.epsMode);
+  // Fixed scale: size the axes from the widest CLR spread (the smallest ε of the
+  // mode) so points visibly move as ε changes, instead of the axes rescaling
+  // with them.
+  const rangeCLR = clrTransform(counts, EPS_MODES[state.epsMode].min, state.epsMode).CLR;
 
   const maxCLR = Math.max(...CLR.map(z => norm3(z)));
   const maxRangeCLR = Math.max(maxCLR, ...rangeCLR.map(z => norm3(z)));
@@ -1676,8 +1738,11 @@ function renderCLR() {
   const layout = makeLayout(`CLR after zero replacement (ε = ${formatEps(eps)})`, axR, CLR_VIEW);
   Plotly.react('clr-plot', traces, layout, plotConfig);
 
+  const howText = state.epsMode === 'absolute'
+    ? 'Zero counts replaced by pseudocount ε, then normalized before CLR.'
+    : 'Zero abundances replaced by ε, then renormalized before CLR.';
   subtitle.innerHTML =
-    `\\( \\pi \\to r(\\pi;\\varepsilon=${formatEps(eps)}) \\to z_{\\mathrm{CLR}}(\\pi;\\varepsilon) \\) &nbsp;·&nbsp; Zero components replaced by ε, then renormalized before CLR.`;
+    `\\( \\pi \\to r(\\pi;\\varepsilon=${formatEps(eps)}) \\to z_{\\mathrm{CLR}}(\\pi;\\varepsilon) \\) &nbsp;·&nbsp; ${howText}`;
   if (window.MathJax?.typesetPromise) MathJax.typesetPromise([subtitle]);
 }
 
@@ -1693,7 +1758,7 @@ function updateZeroAlert() {
   const affected = [];
   Pi.forEach((row, i) => {
     const zeros = row.reduce((s, x) => s + (x <= ZERO_TOL ? 1 : 0), 0);
-    if (zeros > 0) affected.push({ idx: valid[i].index + 1, row, zeros });
+    if (zeros > 0) affected.push({ idx: valid[i].index + 1, comp: row, counts: valid[i].counts, zeros });
   });
   const el = document.getElementById('zero-alert');
   if (affected.length === 0 && invalid.length === 0) {
@@ -1709,15 +1774,20 @@ function updateZeroAlert() {
       parts.push(`<strong>${invalid.length} ${rowWord} all components equal to zero.</strong> ${invalidText}`);
     }
     if (affected.length > 0) {
-      parts.push(`<strong>${affected.length} composition${affected.length>1?'s':''} contain exact zero components.</strong> For CLR, zero components are replaced by ε = ${formatEps(state.eps)} and the row is renormalized:`);
+      const how = state.epsMode === 'absolute'
+        ? `For CLR, zero counts are replaced by a pseudocount ε = ${formatEps(state.eps)}, then the row is normalized:`
+        : `For CLR, zero abundances are replaced by ε = ${formatEps(state.eps)} and the row is renormalized:`;
+      parts.push(`<strong>${affected.length} row${affected.length>1?'s':''} contain an exact zero.</strong> ${how}`);
     }
     let html = parts.join(' ');
     html += affected.length > 0 ? `<div class="eps-affected-list">` : '';
-    affected.forEach(({idx, row}) => {
-      const Pi_pos = row.map(x => x <= ZERO_TOL ? state.eps : x);
-      const s = Pi_pos.reduce((a,b)=>a+b,0);
-      const norm = Pi_pos.map(x=>x/s);
-      html += `<div class="eps-affected-item">Point ${idx}: (${row.map(x=>x.toFixed(3)).join(', ')}) → (${norm.map(x=>x.toFixed(4)).join(', ')})</div>`;
+    affected.forEach(({idx, comp, counts}) => {
+      const r = zeroReplacedComposition(counts, state.eps, state.epsMode);
+      const rStr = r.map(x => x.toFixed(4)).join(', ');
+      const lhs = state.epsMode === 'absolute'
+        ? `n = (${counts.join(', ')})`
+        : `π = (${comp.map(x => x.toFixed(3)).join(', ')})`;
+      html += `<div class="eps-affected-item">Point ${idx}: ${lhs} → r = (${rStr})</div>`;
     });
     html += affected.length > 0 ? `</div>` : '';
     el.className = 'zero-alert has-zeros';
@@ -1732,24 +1802,25 @@ function renderTable() {
   const tbody = document.getElementById('points-tbody');
   tbody.innerHTML = '';
   state.points.forEach((pt, i) => {
-    const sum = pt.reduce((a,b)=>a+b,0);
-    const isInvalid = sum <= 0;
-    const sumOk = !isInvalid && Math.abs(sum - 1) < 0.001;
+    const total = pt.reduce((a,b)=>a+b,0);
+    const isInvalid = total <= 0;
     const hasZero = pt.some(x => x <= ZERO_TOL);
+    const abundance = isInvalid ? null : pt.map(x => x / total);
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>
         <span class="color-swatch" style="background:${COLORS[i]}"></span>
         <span class="pt-label" style="margin-left:6px">Point ${i+1}</span>
       </td>
-      <td><input class="comp-input" type="number" min="0" max="1" step="0.01"
+      <td><input class="comp-input" type="number" min="0" step="1"
         value="${pt[0]}" data-pt="${i}" data-dim="0" oninput="onPointInput(this)"></td>
-      <td><input class="comp-input" type="number" min="0" max="1" step="0.01"
+      <td><input class="comp-input" type="number" min="0" step="1"
         value="${pt[1]}" data-pt="${i}" data-dim="1" oninput="onPointInput(this)"></td>
-      <td><input class="comp-input" type="number" min="0" max="1" step="0.01"
+      <td><input class="comp-input" type="number" min="0" step="1"
         value="${pt[2]}" data-pt="${i}" data-dim="2" oninput="onPointInput(this)"></td>
-      <td><span class="sum-display ${sumOk?'sum-ok':'sum-warn'}">${sum.toFixed(3)}</span></td>
-      <td><span class="zero-badge${(hasZero || isInvalid)?'':' hidden'}">${isInvalid ? 'Invalid' : 'Boundary'}</span></td>
+      <td><span class="sum-display ${isInvalid?'sum-warn':'sum-ok'}">${total}</span></td>
+      <td class="abundance-cell">${abundance ? abundance.map(x=>x.toFixed(3)).join(', ') : '—'}</td>
+      <td><span class="zero-badge${(hasZero || isInvalid)?'':' hidden'}">${isInvalid ? 'Invalid' : 'Has zero'}</span></td>
       `;
     tbody.appendChild(row);
   });
@@ -1775,32 +1846,100 @@ function applyPreset(name) {
 // ────────────────────────────────────────────────────────────
 // EPS CONTROLS
 // ────────────────────────────────────────────────────────────
-function onEpsSliderChange(logVal) {
-  const eps = Math.pow(10, Number(logVal));
-  state.eps = eps;
-  document.getElementById('eps-number').value = formatEps(eps);
+// Warn if ε is larger than the smallest real observation it would sit beside:
+// in 'relative' mode that is the smallest nonzero abundance in a zero-containing
+// row; in 'absolute' mode the smallest nonzero count. A replacement bigger than
+// real data is not meaningful.
+function updateEpsWarning() {
+  const el = document.getElementById('eps-warning');
+  if (!el) return;
+  const mode = state.epsMode;
+  const eps = state.eps;
+  const fmt = v => mode === 'absolute'
+    ? String(v)
+    : (v < 1e-3 ? v.toExponential(1) : Number(v.toPrecision(3)).toString());
+
+  const offenders = [];
+  validCompositions().forEach(item => {
+    if (!item.row.some(x => x <= ZERO_TOL)) return;            // only rows with a zero
+    const observed = (mode === 'absolute' ? item.counts : item.row).filter(x => x > ZERO_TOL);
+    if (observed.length === 0) return;
+    const minObs = Math.min(...observed);
+    if (eps > minObs) offenders.push({ idx: item.index + 1, minObs });
+  });
+
+  if (offenders.length === 0) {
+    el.className = 'eps-warning hidden';
+    el.innerHTML = '';
+    return;
+  }
+  const unit = mode === 'absolute' ? 'count' : 'abundance';
+  const list = offenders.map(o => `Point ${o.idx} (smallest ${fmt(o.minObs)})`).join(', ');
+  el.className = 'eps-warning';
+  el.innerHTML = `<strong>ε = ${formatEps(eps)} exceeds an observed ${unit}.</strong> It is larger than the smallest nonzero ${unit} in ${list}. Lower ε so the replacement stays below real observations.`;
+}
+
+function refreshClrViews() {
   renderCLR();
   updateZeroAlert();
   renderReadout();
+  updateEpsWarning();
+}
+
+function onEpsSliderChange(logVal) {
+  const cfg = EPS_MODES[state.epsMode];
+  const eps = Math.max(cfg.min, Math.min(cfg.max, Math.pow(10, Number(logVal))));
+  state.eps = eps;
+  document.getElementById('eps-number').value = formatEps(eps);
+  refreshClrViews();
 }
 
 function onEpsNumberChange(val) {
   if (val === '') return;
   let eps = Number(val);
   if (!Number.isFinite(eps)) return;
-  eps = Math.max(EPS_MIN, Math.min(EPS_MAX, eps));
+  const cfg = EPS_MODES[state.epsMode];
+  eps = Math.max(cfg.min, Math.min(cfg.max, eps));
   state.eps = eps;
   document.getElementById('eps-slider').value = Math.log10(eps).toFixed(3);
   document.getElementById('eps-number').value = formatEps(eps);
-  renderCLR();
-  updateZeroAlert();
-  renderReadout();
+  refreshClrViews();
 }
 
-function onLockClrScaleChange(checked) {
-  state.lockClrScale = checked;
-  renderCLR();
+function updateEpsSubtitle() {
+  const el = document.getElementById('eps-subtitle-text');
+  if (!el) return;
+  el.textContent = state.epsMode === 'absolute'
+    ? 'CLR is undefined when a count is exactly zero. Each zero count is replaced by a pseudocount ε, the row is normalized to a composition, and CLR is applied. Because ε is in count units, its effect depends on the sample’s total count; positive counts are untouched.'
+    : 'CLR is undefined when an abundance is exactly zero. Each zero abundance is set to ε, the row is renormalized, and CLR is applied. ε is a fraction of the total; positive components are untouched.';
 }
+
+function onEpsModeChange(mode) {
+  if (!EPS_MODES[mode] || mode === state.epsMode) return;
+  const cfg = EPS_MODES[mode];
+  state.epsMode = mode;
+  state.eps = cfg.default;
+
+  document.getElementById('eps-mode-relative').classList.toggle('active', mode === 'relative');
+  document.getElementById('eps-mode-absolute').classList.toggle('active', mode === 'absolute');
+  document.getElementById('eps-mode-relative').setAttribute('aria-checked', String(mode === 'relative'));
+  document.getElementById('eps-mode-absolute').setAttribute('aria-checked', String(mode === 'absolute'));
+
+  const num = document.getElementById('eps-number');
+  num.min = cfg.min; num.max = cfg.max; num.step = cfg.step;
+  num.value = formatEps(cfg.default);
+
+  const sl = document.getElementById('eps-slider');
+  sl.min = cfg.sliderMin; sl.max = cfg.sliderMax;
+  sl.value = Math.log10(cfg.default).toFixed(3);
+
+  document.getElementById('eps-range-labels').innerHTML =
+    cfg.labels.map(l => `<span>${l}</span>`).join('');
+
+  updateEpsSubtitle();
+  refreshClrViews();
+}
+
 
 // ────────────────────────────────────────────────────────────
 // NUMERICAL READOUT
@@ -1815,9 +1954,11 @@ function renderReadout() {
     tbody.innerHTML = `<tr><td colspan="5">Enter at least one row with a positive total to compute transformed coordinates.</td></tr>`;
     return;
   }
+  const counts = valid.map(item => item.counts);
+  const baseline = EPS_MODES[state.epsMode].default;
   const { Z } = ahcTransform(Pi);
-  const { CLR } = clrTransform(Pi, state.eps);
-  const { CLR: CLRDefault } = clrTransform(Pi, DEFAULT_EPS);
+  const { CLR } = clrTransform(counts, state.eps, state.epsMode);
+  const { CLR: CLRDefault } = clrTransform(counts, baseline, state.epsMode);
 
   tbody.innerHTML = '';
   Pi.forEach((row, i) => {
@@ -1844,12 +1985,14 @@ function updateAll() {
   renderAHC();
   renderCLR();
   renderReadout();
+  updateEpsWarning();
 }
 
 // ────────────────────────────────────────────────────────────
 // INIT
 // ────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
+  updateEpsSubtitle();
   updateAll();
 });
 </script>
