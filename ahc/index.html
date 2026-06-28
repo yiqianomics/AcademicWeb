@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AHC and CLR Transformations for Zero-Containing Compositions</title>
+<title>HRIT and CLR Transformations for Zero-Containing Compositions</title>
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 <script>
 window.MathJax = {
@@ -23,9 +23,9 @@ window.MathJax = {
   --text: #1a202c;
   --text-muted: #64748b;
   --text-xs: #94a3b8;
-  --accent-ahc: #ea7320;
-  --accent-ahc-bg: #fff7ed;
-  --accent-ahc-border: #fed7aa;
+  --accent-hrit: #ea7320;
+  --accent-hrit-bg: #fff7ed;
+  --accent-hrit-border: #fed7aa;
   --accent-clr: #7c3aed;
   --accent-clr-bg: #f5f3ff;
   --accent-clr-border: #ddd6fe;
@@ -90,7 +90,7 @@ body {
   font-weight: 600;
   letter-spacing: 0;
 }
-.badge-ahc {
+.badge-hrit {
   background: rgba(234,115,32,0.2);
   border: 1px solid rgba(234,115,32,0.5);
   color: #fdba74;
@@ -473,9 +473,9 @@ body {
   --text-muted: #5f6b7a;
   --text-xs: #8a94a3;
   --text-light: #8a94a3;
-  --accent-ahc: #0f766e;
-  --accent-ahc-bg: #ecfdf5;
-  --accent-ahc-border: #99f6e4;
+  --accent-hrit: #0f766e;
+  --accent-hrit-bg: #ecfdf5;
+  --accent-hrit-border: #99f6e4;
   --accent-clr: #475569;
   --accent-clr-bg: #f1f5f9;
   --accent-clr-border: #cbd5e1;
@@ -497,14 +497,45 @@ body {
   --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
   --shadow-md: 0 1px 2px rgba(15, 23, 42, 0.06);
   --shadow-lg: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --dna-helix-bg: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='280'%20height='560'%20viewBox='0%200%20280%20560'%3E%3Cg%20fill='none'%20stroke-linecap='round'%3E%3Cpath%20d='M88%2028%20C190%2088%20190%20144%2088%20204%20S-14%20320%2088%20380%20S190%20496%2088%20536'%20stroke='%23b7dbf5'%20stroke-width='3.5'/%3E%3Cpath%20d='M192%2028%20C90%2088%2090%20144%20192%20204%20S294%20320%20192%20380%20S90%20496%20192%20536'%20stroke='%23cfeafa'%20stroke-width='3.5'/%3E%3Cg%20stroke='%239ccbf0'%20stroke-width='1.6'%20opacity='.8'%3E%3Cline%20x1='88'%20y1='28'%20x2='192'%20y2='28'/%3E%3Cline%20x1='126'%20y1='66'%20x2='154'%20y2='66'/%3E%3Cline%20x1='172'%20y1='112'%20x2='108'%20y2='112'/%3E%3Cline%20x1='190'%20y1='158'%20x2='90'%20y2='158'/%3E%3Cline%20x1='88'%20y1='204'%20x2='192'%20y2='204'/%3E%3Cline%20x1='126'%20y1='242'%20x2='154'%20y2='242'/%3E%3Cline%20x1='172'%20y1='288'%20x2='108'%20y2='288'/%3E%3Cline%20x1='190'%20y1='334'%20x2='90'%20y2='334'/%3E%3Cline%20x1='88'%20y1='380'%20x2='192'%20y2='380'/%3E%3Cline%20x1='126'%20y1='418'%20x2='154'%20y2='418'/%3E%3Cline%20x1='172'%20y1='464'%20x2='108'%20y2='464'/%3E%3Cline%20x1='190'%20y1='510'%20x2='90'%20y2='510'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  background: var(--bg);
+  background: #f7fbff;
   color: var(--text);
   line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.34;
+  background-image: var(--dna-helix-bg), var(--dna-helix-bg);
+  background-position: right 28px top 80px, left 28px top 300px;
+  background-repeat: repeat-y;
+  background-size: 280px 560px;
+}
+
+.site-header,
+.main-content,
+.site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  body::before {
+    opacity: 0.22;
+    background-position: right -88px top 120px, left -118px top 420px;
+    background-size: 240px 480px;
+  }
 }
 
 .site-header {
@@ -612,7 +643,7 @@ body {
 }
 
 .comp-input:focus {
-  border-color: var(--accent-ahc);
+  border-color: var(--accent-hrit);
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
 }
 
@@ -634,9 +665,9 @@ body {
 }
 
 .preset-btn:hover {
-  border-color: var(--accent-ahc);
-  color: var(--accent-ahc);
-  background: var(--accent-ahc-bg);
+  border-color: var(--accent-hrit);
+  color: var(--accent-hrit);
+  background: var(--accent-hrit-bg);
 }
 
 .preset-panel {
@@ -709,8 +740,8 @@ body {
 }
 
 .zero-alert.no-zeros {
-  background: var(--accent-ahc-bg);
-  border-color: var(--accent-ahc-border);
+  background: var(--accent-hrit-bg);
+  border-color: var(--accent-hrit-border);
   color: #065f56;
 }
 
@@ -782,8 +813,8 @@ body {
   padding: 20px;
 }
 
-.formula-card.ahc-card {
-  border-top: 3px solid var(--accent-ahc);
+.formula-card.hrit-card {
+  border-top: 3px solid var(--accent-hrit);
 }
 
 .formula-card.clr-card {
@@ -961,15 +992,15 @@ body {
 }
 
 .toy-choice-btn:hover {
-  border-color: var(--accent-ahc);
-  color: var(--accent-ahc);
-  background: var(--accent-ahc-bg);
+  border-color: var(--accent-hrit);
+  color: var(--accent-hrit);
+  background: var(--accent-hrit-bg);
 }
 
 .toy-choice-btn.active {
-  border-color: var(--accent-ahc);
+  border-color: var(--accent-hrit);
   color: #065f56;
-  background: var(--accent-ahc-bg);
+  background: var(--accent-hrit-bg);
 }
 
 .toy-color-key {
@@ -1022,7 +1053,7 @@ body {
 }
 
 .site-footer a {
-  color: var(--accent-ahc);
+  color: var(--accent-hrit);
   text-decoration: none;
 }
 
@@ -1195,12 +1226,12 @@ body {
 <!-- ════════════════════════════════════════════ HEADER -->
 <header class="site-header">
   <div class="header-inner">
-    <h1>AHC and CLR transformations on zero-containing compositions</h1>
+    <h1>HRIT and CLR transformations on zero-containing compositions</h1>
     <p class="lead">
       Compositional data usually arrive as counts. Each sample's counts \(n\)
       are normalized to a relative abundance \(\pi_i = n_i/\sum_j n_j\), and the
-      transformations act on \(\pi\). The Arc-Hellinger Centered (AHC)
-      transformation maps the closed simplex through a square-root geometry and
+      transformations act on \(\pi\). The HRIT transformation (Hellinger-Riemann
+      intrinsic coordinates) maps the closed simplex through a square-root geometry and
       stays finite at exact zeros. The Centered Log-Ratio (CLR) transformation
       needs strictly positive components, so any zero must be replaced first.
       The plots below show that difference point by point.
@@ -1221,7 +1252,7 @@ body {
       <ol>
         <li>Load the boundary or near-zero preset.</li>
         <li>Pick the ε scale (counts or abundance), then drag \(\varepsilon\).</li>
-        <li>Watch where the AHC and CLR coordinates land, and check the norms below.</li>
+        <li>Watch where the HRIT and CLR coordinates land, and check the norms below.</li>
       </ol>
     </div>
     <div class="marker-key" aria-label="Marker style key">
@@ -1308,27 +1339,27 @@ body {
   <!-- ── PLOTS GRID ── -->
   <div class="section-heading">
     <h2>Transformation comparison</h2>
-    <p>The same points under each transformation — AHC applied directly, CLR applied after exact zeros are replaced.</p>
+    <p>The same points under each transformation — HRIT applied directly, CLR applied after exact zeros are replaced.</p>
   </div>
 
   <div class="plots-grid">
 
-    <!-- AHC Plot -->
+    <!-- HRIT Plot -->
     <div class="plot-card">
       <div class="plot-card-header">
         <div class="plot-card-header-inner">
           <div>
-            <div class="plot-card-title">AHC: direct transformation on the closed simplex</div>
-            <div class="plot-card-sub">\( \pi \to q=\sqrt{\pi} \to z_{\mathrm{AHC}}(\pi) \) &nbsp;·&nbsp; No zero replacement needed.</div>
+            <div class="plot-card-title">HRIT: direct transformation on the closed simplex</div>
+            <div class="plot-card-sub">\( \pi \to q=\sqrt{\pi} \to z_{\mathrm{HRIT}}(\pi) \) &nbsp;·&nbsp; No zero replacement needed.</div>
           </div>
         </div>
       </div>
       <div class="plot-legend">
         <div class="legend-item"><div class="legend-shape circle" style="border-color:#555"></div> Original composition π</div>
         <div class="legend-item"><div class="legend-shape diamond" style="border-color:#555"></div> Square-root point q = √π</div>
-        <div class="legend-item"><div class="legend-shape square" style="border-color:#555"></div> AHC coordinate \(z_{\mathrm{AHC}}(\pi)\)</div>
+        <div class="legend-item"><div class="legend-shape square" style="border-color:#555"></div> HRIT coordinate \(z_{\mathrm{HRIT}}(\pi)\)</div>
       </div>
-      <div class="plot-div" id="ahc-plot"></div>
+      <div class="plot-div" id="hrit-plot"></div>
       <div class="plot-card-note">Points with exact zeros stay finite.</div>
     </div>
 
@@ -1368,7 +1399,7 @@ body {
             <tr>
               <th>Point</th>
               <th>Contains zero?</th>
-              <th>∥z<sub>AHC</sub>∥</th>
+              <th>∥z<sub>HRIT</sub>∥</th>
               <th>∥z<sub>CLR</sub>(ε)∥</th>
               <th>ΔCLR vs default ε</th>
             </tr>
@@ -1386,18 +1417,18 @@ body {
       <p>Both transformations produce zero-sum coordinates, but they start from different domains.</p>
     </div>
     <div class="formula-grid">
-      <article class="formula-card ahc-card">
-        <h3>AHC transformation</h3>
+      <article class="formula-card hrit-card">
+        <h3>HRIT transformation</h3>
         <p>
           For a composition \( \pi \in \Delta^{p-1} \), define
           \( q_i=\sqrt{\pi_i} \), \( q_0=p^{-1/2}\mathbf{1} \),
           \( c=q^\top q_0 \), and \( s=\sqrt{1-c^2} \). Then
         </p>
         <p class="display-math">
-          \( z_{\mathrm{AHC}}(\pi)=\frac{\arcsin(s)}{s}(q-cq_0). \)
+          \( z_{\mathrm{HRIT}}(\pi)=\frac{\arcsin(s)}{s}(q-cq_0). \)
         </p>
         <p>
-          When \(s=0\) the factor \(\arcsin(s)/s\) is read at its limit of \(1\). That happens only at the uniform composition, where \(q=q_0\) and \(z_{\mathrm{AHC}}(\pi)=0\). Because the square root is finite at zero, the map applies to compositions with exact zeros without any preprocessing.
+          When \(s=0\) the factor \(\arcsin(s)/s\) is read at its limit of \(1\). That happens only at the uniform composition, where \(q=q_0\) and \(z_{\mathrm{HRIT}}(\pi)=0\). Because the square root is finite at zero, the map applies to compositions with exact zeros without any preprocessing.
         </p>
       </article>
 
@@ -1453,7 +1484,7 @@ body {
       <thead>
         <tr>
           <th>Property</th>
-          <th>AHC</th>
+          <th>HRIT</th>
           <th>CLR after zero replacement</th>
         </tr>
       </thead>
@@ -1584,7 +1615,7 @@ body {
   <section class="package-tutorial" aria-labelledby="package-title">
     <h2 id="package-title">Use the R package</h2>
     <p>
-      The ArcHellinger package runs the same zero-compatible transformation in R.
+      The HRIC package runs the same zero-compatible transformation in R.
       Give it a sample-by-feature table. Counts are fine; each row is normalized
       internally, and exact zeros can stay as zeros.
     </p>
@@ -1594,7 +1625,7 @@ body {
 library(devtools)
 devtools::install_github("yiqianomics/HRIC")
 
-library(ArcHellinger)
+library(HRIC)
 
 X <- matrix(c(10, 20, 30,
                5, 15, 80,
@@ -1629,7 +1660,7 @@ beta <- Simplex_Hellinger_beta(X, output = "matrix")</code></pre>
 </main>
 
 <footer class="site-footer">
-  Yiqian Zhang · Updated June 2026 · <span>Version: 2026-06-23</span>
+  Yiqian Zhang · Updated June 2026 · <span>Version: 2026-06-28</span>
 </footer>
 
 <!-- ════════════════════════════════════════════ JAVASCRIPT -->
@@ -1712,7 +1743,7 @@ function validCompositions() {
     .filter(item => item.row !== null);
 }
 
-function ahcTransform(Pi) {
+function hritTransform(Pi) {
   const p = 3;
   const q0 = [1/Math.sqrt(p), 1/Math.sqrt(p), 1/Math.sqrt(p)];
   const Q = Pi.map(row => row.map(x => Math.sqrt(Math.max(0, x))));
@@ -1979,7 +2010,7 @@ function arrowTracesDash(from, to, colors) {
 //              geometry offset to one side. Lower z = lower, more grazing
 //              angle; raise z toward x for a more top-down look.
 //   domainX  : horizontal slice of the frame the scene occupies, in [0,1].
-const AHC_VIEW = { eye:{x:1.14, y:0.37, z:0.90}, domainX:[0, 1] };
+const HRIT_VIEW = { eye:{x:1.14, y:0.37, z:0.90}, domainX:[0, 1] };
 // CLR camera pulled ~2.5× closer than before so the geometry renders ~2.5× larger
 // (same 37° angle and corner swing — each component is the previous CLR eye / 2.5).
 const CLR_VIEW = { eye:{x:0.256, y:0.084, z:0.204}, domainX:[0, 1] };
@@ -2017,19 +2048,19 @@ const plotConfig = {
 };
 
 // ────────────────────────────────────────────────────────────
-// RENDER AHC
+// RENDER HRIT
 // ────────────────────────────────────────────────────────────
-function renderAHC() {
+function renderHRIT() {
   const valid = validCompositions();
   const Pi = valid.map(item => item.row);
   const activeColors = valid.map(item => COLORS[item.index]);
   const pointLabels = valid.map(item => `Point ${item.index + 1}`);
   if (Pi.length === 0) {
-    Plotly.react('ahc-plot', [], makeLayout('AHC: direct transformation', [-1.25, 1.25], AHC_VIEW), plotConfig);
+    Plotly.react('hrit-plot', [], makeLayout('HRIT: direct transformation', [-1.25, 1.25], HRIT_VIEW), plotConfig);
     return;
   }
   const compositionClasses = Pi.map(compositionClass);
-  const { Q, Z } = ahcTransform(Pi);
+  const { Q, Z } = hritTransform(Pi);
 
   const maxZ = Math.max(...Z.map(z => norm3(z)));
   const planeR = Math.max(maxZ, 0.5) * 2.5;
@@ -2044,12 +2075,12 @@ function renderAHC() {
     ...arrowTracesDash(Q, Z, activeColors),
     pointsTrace(Pi, 'Original composition π', 'circle',  5, 0.95, activeColors, compositionClasses, pointLabels),
     pointsTrace(Q,  'Square-root point q = √π',  'diamond', 6, 0.95, activeColors, compositionClasses, pointLabels),
-    pointsTrace(Z,  'AHC coordinate z_AHC(π)', 'square',  6, 0.95, activeColors, compositionClasses, pointLabels)
+    pointsTrace(Z,  'HRIT coordinate z_HRIT(π)', 'square',  6, 0.95, activeColors, compositionClasses, pointLabels)
   ].flat();
 
   const axR = [-1.25, 1.25];
-  const layout = makeLayout('AHC: direct transformation', axR, AHC_VIEW);
-  Plotly.react('ahc-plot', traces, layout, plotConfig);
+  const layout = makeLayout('HRIT: direct transformation', axR, HRIT_VIEW);
+  Plotly.react('hrit-plot', traces, layout, plotConfig);
 }
 
 // ────────────────────────────────────────────────────────────
@@ -2315,7 +2346,7 @@ function renderReadout() {
   }
   const counts = valid.map(item => item.counts);
   const baseline = EPS_MODES[state.epsMode].default;
-  const { Z } = ahcTransform(Pi);
+  const { Z } = hritTransform(Pi);
   const { CLR } = clrTransform(counts, state.eps, state.epsMode);
   const { CLR: CLRDefault } = clrTransform(counts, baseline, state.epsMode);
 
@@ -2447,7 +2478,7 @@ function selectToyExample(kind, key) {
 function updateAll() {
   renderTable();
   updateZeroAlert();
-  renderAHC();
+  renderHRIT();
   renderCLR();
   renderReadout();
   updateEpsWarning();
