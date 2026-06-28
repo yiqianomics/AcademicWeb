@@ -871,6 +871,151 @@ body {
   font-family: "SF Mono", Monaco, Consolas, monospace;
 }
 
+.toy-example-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.toy-example-panel + .toy-example-panel {
+  margin-top: 4px;
+}
+
+.toy-panel-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.toy-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 18px;
+  align-items: start;
+}
+
+.toy-plot-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.toy-figure {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.toy-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #ffffff;
+}
+
+.toy-figure figcaption {
+  border-top: 1px solid var(--border);
+  padding: 9px 12px;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.toy-control {
+  border-left: 1px solid var(--border);
+  padding-left: 18px;
+}
+
+.toy-control h3 {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.toy-control p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  margin-bottom: 12px;
+}
+
+.toy-choice-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.toy-choice-btn {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: 0.86rem;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toy-choice-btn:hover {
+  border-color: var(--accent-ahc);
+  color: var(--accent-ahc);
+  background: var(--accent-ahc-bg);
+}
+
+.toy-choice-btn.active {
+  border-color: var(--accent-ahc);
+  color: #065f56;
+  background: var(--accent-ahc-bg);
+}
+
+.toy-color-key {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.toy-color-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toy-color-chip {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(31, 41, 51, 0.16);
+}
+
+@media (max-width: 900px) {
+  .toy-layout {
+    grid-template-columns: 1fr;
+  }
+  .toy-control {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 14px;
+  }
+  .toy-choice-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .toy-choice-btn {
+    flex: 1 1 160px;
+  }
+}
+
 .site-footer {
   background: var(--surface);
   color: var(--text-light);
@@ -952,6 +1097,77 @@ body {
   box-shadow: none;
 }
 
+.package-tutorial {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.package-tutorial h2 {
+  font-size: 1.08rem;
+  margin-bottom: 6px;
+}
+
+.package-tutorial p {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  max-width: 780px;
+}
+
+.package-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
+  gap: 20px;
+  margin-top: 16px;
+  align-items: start;
+}
+
+.package-code {
+  background: #111827;
+  color: #e5e7eb;
+  border-radius: var(--radius-sm);
+  padding: 15px 16px;
+  overflow-x: auto;
+  font-family: "SF Mono", Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.package-code code {
+  font-family: inherit;
+}
+
+.function-list {
+  border-left: 1px solid var(--border);
+  padding-left: 18px;
+}
+
+.function-list h3 {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.function-list ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.function-list li {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.function-list code {
+  color: var(--text);
+  font-family: "SF Mono", Monaco, Consolas, monospace;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 @media (max-width: 800px) {
   .quick-guide {
     grid-template-columns: 1fr;
@@ -961,6 +1177,15 @@ body {
     border-top: 1px solid var(--border);
     padding-left: 0;
     padding-top: 14px;
+  }
+  .package-grid {
+    grid-template-columns: 1fr;
+  }
+  .function-list {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 16px;
   }
 }
 </style>
@@ -1265,6 +1490,140 @@ body {
         </tr>
       </tbody>
     </table>
+  </section>
+
+  <!-- ── TOY EXAMPLE ── -->
+  <section class="section-block">
+    <div class="section-heading">
+      <h2>Toy example with throat microbiome data</h2>
+      <p>
+        The GUniFrac throat data include 60 samples and 856 OTUs. Samples are
+        split by smoking status: 32 non-smokers and 28 smokers. The plots below
+        compare HRIC outputs with familiar alpha and beta diversity summaries.
+      </p>
+    </div>
+
+    <div class="toy-example-panel">
+      <div class="toy-panel-title">Alpha diversity</div>
+      <div class="toy-layout">
+        <div class="toy-plot-stack">
+          <figure class="toy-figure">
+            <img
+              id="toy-alpha-primary-img"
+              src="assets/toy-example/alpha-hric-dominance.png"
+              alt="Violin plot of Simplex Hellinger dominance for non-smokers and smokers in the GUniFrac throat data">
+            <figcaption id="toy-alpha-primary-caption">
+              Simplex Hellinger dominance is the raw geodesic distance
+              \(D(\pi)=\|HRIC(\pi)\|\).
+            </figcaption>
+          </figure>
+
+          <figure class="toy-figure">
+            <img
+              id="toy-alpha-secondary-img"
+              src="assets/toy-example/alpha-hric-evenness.png"
+              alt="Violin plot of Simplex Hellinger evenness for non-smokers and smokers in the GUniFrac throat data">
+            <figcaption id="toy-alpha-secondary-caption">
+              Simplex Hellinger evenness is \(1-D(\pi)/\arccos(1/\sqrt{p})\).
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="toy-control">
+          <h3>Choose alpha summary</h3>
+          <p>Each choice keeps the same two-group violin format so the methods can be compared directly.</p>
+          <div class="toy-choice-bar" aria-label="Alpha diversity method selector">
+            <button class="toy-choice-btn active" type="button" data-toy-alpha="hric" onclick="selectToyExample('alpha', 'hric')">Simplex Hellinger</button>
+            <button class="toy-choice-btn" type="button" data-toy-alpha="shannon" onclick="selectToyExample('alpha', 'shannon')">Shannon</button>
+            <button class="toy-choice-btn" type="button" data-toy-alpha="simpson" onclick="selectToyExample('alpha', 'simpson')">Simpson</button>
+            <button class="toy-choice-btn" type="button" data-toy-alpha="richness" onclick="selectToyExample('alpha', 'richness')">Observed richness</button>
+          </div>
+          <div class="toy-color-key">
+            <span><i class="toy-color-chip" style="background:#6a9bcb"></i>Non-smoker</span>
+            <span><i class="toy-color-chip" style="background:#cb5148"></i>Smoker</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toy-example-panel">
+      <div class="toy-panel-title">Beta diversity</div>
+      <div class="toy-layout">
+        <div class="toy-plot-stack">
+          <figure class="toy-figure">
+            <img
+              id="toy-beta-img"
+              src="assets/toy-example/beta-hric-pcoa.png"
+              alt="PCoA plot of Simplex Hellinger beta diversity for non-smokers and smokers with group ellipses">
+            <figcaption id="toy-beta-caption">
+              Simplex Hellinger beta diversity is the Euclidean distance between
+              HRIC coordinate vectors.
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="toy-control">
+          <h3>Choose beta distance</h3>
+          <p>Each PCoA uses the selected pairwise distance and the same smoking-status colors.</p>
+          <div class="toy-choice-bar" aria-label="Beta diversity method selector">
+            <button class="toy-choice-btn active" type="button" data-toy-beta="hric" onclick="selectToyExample('beta', 'hric')">Simplex Hellinger</button>
+            <button class="toy-choice-btn" type="button" data-toy-beta="aitchison" onclick="selectToyExample('beta', 'aitchison')">Aitchison</button>
+            <button class="toy-choice-btn" type="button" data-toy-beta="bray" onclick="selectToyExample('beta', 'bray')">Bray-Curtis</button>
+            <button class="toy-choice-btn" type="button" data-toy-beta="jaccard" onclick="selectToyExample('beta', 'jaccard')">Jaccard</button>
+          </div>
+          <div class="toy-color-key">
+            <span><i class="toy-color-chip" style="background:#6a9bcb"></i>Non-smoker</span>
+            <span><i class="toy-color-chip" style="background:#cb5148"></i>Smoker</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── R PACKAGE ── -->
+  <section class="package-tutorial" aria-labelledby="package-title">
+    <h2 id="package-title">Use the R package</h2>
+    <p>
+      The ArcHellinger package runs the same zero-compatible transformation in R.
+      Give it a sample-by-feature table. Counts are fine; each row is normalized
+      internally, and exact zeros can stay as zeros.
+    </p>
+
+    <div class="package-grid">
+      <pre class="package-code"><code># Install from GitHub
+library(devtools)
+devtools::install_github("yiqianomics/HRIC")
+
+library(ArcHellinger)
+
+X <- matrix(c(10, 20, 30,
+               5, 15, 80,
+               0, 10, 90),
+            nrow = 3,
+            byrow = TRUE)
+
+# Hellinger-Riemann intrinsic coordinates
+z <- HRIC(X)
+
+# Reference-based coordinates; default reference is the last column
+zr <- RHRIC(X)
+
+# Simplex Hellinger alpha diversity
+alpha <- Simplex_Hellinger_alpha(X, measure = "both")
+
+# Simplex Hellinger beta diversity
+beta <- Simplex_Hellinger_beta(X, output = "matrix")</code></pre>
+
+      <div class="function-list">
+        <h3>What each function returns</h3>
+        <ul>
+          <li><code>HRIC(X)</code> gives centered coordinates for every sample.</li>
+          <li><code>RHRIC(X)</code> gives reference-based coordinates, using the last column by default.</li>
+          <li><code>Simplex_Hellinger_alpha(X)</code> gives normalized dominance or evenness.</li>
+          <li><code>Simplex_Hellinger_beta(X)</code> gives pairwise sample distances.</li>
+        </ul>
+      </div>
+    </div>
   </section>
 
 </main>
@@ -1974,6 +2333,112 @@ function renderReadout() {
     `;
     tbody.appendChild(tr);
   });
+}
+
+// ────────────────────────────────────────────────────────────
+// TOY EXAMPLE FIGURE SWITCHER
+// ────────────────────────────────────────────────────────────
+const TOY_EXAMPLE = {
+  alpha: {
+    hric: {
+      primarySrc: 'assets/toy-example/alpha-hric-dominance.png',
+      primaryAlt: 'Violin plot of Simplex Hellinger dominance for non-smokers and smokers in the GUniFrac throat data',
+      primaryCaption: 'Simplex Hellinger dominance is the raw geodesic distance \\(D(\\pi)=\\|HRIC(\\pi)\\|\\).',
+      secondarySrc: 'assets/toy-example/alpha-hric-evenness.png',
+      secondaryAlt: 'Violin plot of Simplex Hellinger evenness for non-smokers and smokers in the GUniFrac throat data',
+      secondaryCaption: 'Simplex Hellinger evenness is \\(1-D(\\pi)/\\arccos(1/\\sqrt{p})\\).'
+    },
+    shannon: {
+      primarySrc: 'assets/toy-example/alpha-shannon-diversity.png',
+      primaryAlt: 'Violin plot of Shannon diversity for non-smokers and smokers in the GUniFrac throat data',
+      primaryCaption: 'Shannon diversity summarizes entropy of the relative-abundance profile.',
+      secondarySrc: 'assets/toy-example/alpha-shannon-evenness.png',
+      secondaryAlt: 'Violin plot of Pielou evenness for non-smokers and smokers in the GUniFrac throat data',
+      secondaryCaption: 'Pielou evenness scales Shannon diversity by the log of observed richness.'
+    },
+    simpson: {
+      primarySrc: 'assets/toy-example/alpha-simpson-diversity.png',
+      primaryAlt: 'Violin plot of Simpson diversity for non-smokers and smokers in the GUniFrac throat data',
+      primaryCaption: 'The Gini-Simpson index emphasizes abundant taxa and is bounded between 0 and 1.',
+      secondarySrc: 'assets/toy-example/alpha-simpson-evenness.png',
+      secondaryAlt: 'Violin plot of Simpson evenness for non-smokers and smokers in the GUniFrac throat data',
+      secondaryCaption: 'Simpson evenness divides inverse Simpson diversity by observed richness.'
+    },
+    richness: {
+      primarySrc: 'assets/toy-example/alpha-richness-observed.png',
+      primaryAlt: 'Violin plot of observed richness for non-smokers and smokers in the GUniFrac throat data',
+      primaryCaption: 'Observed richness counts the number of OTUs detected in each sample.',
+      secondarySrc: 'assets/toy-example/alpha-richness-relative.png',
+      secondaryAlt: 'Violin plot of relative observed richness for non-smokers and smokers in the GUniFrac throat data',
+      secondaryCaption: 'Relative richness divides observed OTUs by the total number of OTUs in the table.'
+    }
+  },
+  beta: {
+    hric: {
+      src: 'assets/toy-example/beta-hric-pcoa.png',
+      alt: 'PCoA plot of Simplex Hellinger beta diversity for non-smokers and smokers with group ellipses',
+      caption: 'Simplex Hellinger beta diversity is the Euclidean distance between HRIC coordinate vectors.'
+    },
+    aitchison: {
+      src: 'assets/toy-example/beta-aitchison-pcoa.png',
+      alt: 'PCoA plot of Aitchison distance for non-smokers and smokers with group ellipses',
+      caption: 'Aitchison distance is computed as Euclidean distance between CLR coordinates after a 0.5 pseudocount.'
+    },
+    bray: {
+      src: 'assets/toy-example/beta-bray-pcoa.png',
+      alt: 'PCoA plot of Bray-Curtis distance for non-smokers and smokers with group ellipses',
+      caption: 'Bray-Curtis is an abundance-based community dissimilarity.'
+    },
+    jaccard: {
+      src: 'assets/toy-example/beta-jaccard-pcoa.png',
+      alt: 'PCoA plot of Jaccard distance for non-smokers and smokers with group ellipses',
+      caption: 'Jaccard distance uses presence-absence patterns rather than abundance.'
+    }
+  }
+};
+
+function setToyButtonState(kind, key) {
+  document.querySelectorAll(`[data-toy-${kind}]`).forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute(`data-toy-${kind}`) === key);
+  });
+}
+
+function renderToyMath(...nodes) {
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise(nodes).catch(() => {});
+  }
+}
+
+function selectToyExample(kind, key) {
+  const item = TOY_EXAMPLE[kind] && TOY_EXAMPLE[kind][key];
+  if (!item) return;
+
+  setToyButtonState(kind, key);
+
+  if (kind === 'alpha') {
+    const primaryImg = document.getElementById('toy-alpha-primary-img');
+    const primaryCaption = document.getElementById('toy-alpha-primary-caption');
+    const secondaryImg = document.getElementById('toy-alpha-secondary-img');
+    const secondaryCaption = document.getElementById('toy-alpha-secondary-caption');
+
+    primaryImg.src = item.primarySrc;
+    primaryImg.alt = item.primaryAlt;
+    primaryCaption.innerHTML = item.primaryCaption;
+
+    secondaryImg.src = item.secondarySrc;
+    secondaryImg.alt = item.secondaryAlt;
+    secondaryCaption.innerHTML = item.secondaryCaption;
+
+    renderToyMath(primaryCaption, secondaryCaption);
+    return;
+  }
+
+  const betaImg = document.getElementById('toy-beta-img');
+  const betaCaption = document.getElementById('toy-beta-caption');
+  betaImg.src = item.src;
+  betaImg.alt = item.alt;
+  betaCaption.innerHTML = item.caption;
+  renderToyMath(betaCaption);
 }
 
 // ────────────────────────────────────────────────────────────
