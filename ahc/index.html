@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HRIT and CLR Transformations for Zero-Containing Compositions</title>
+<title>Simplex Hellinger and Aitchison Geometry for Microbiome Diversity</title>
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 <script>
 window.MathJax = {
@@ -177,6 +177,12 @@ body {
   vertical-align: middle;
 }
 .points-table tr:last-child td { border-bottom: none; }
+
+.points-table td:first-child,
+.point-cell {
+  white-space: nowrap;
+  min-width: 96px;
+}
 
 .abundance-cell {
   font-family: 'SF Mono', 'Monaco', Consolas, monospace;
@@ -582,6 +588,7 @@ body::before {
   max-width: 1400px;
   padding: 28px 24px 34px;
   gap: 24px;
+  min-width: 0;
 }
 
 .card,
@@ -625,6 +632,14 @@ body::before {
 
 .controls-grid {
   grid-template-columns: minmax(0, 1fr) 360px;
+  min-width: 0;
+}
+
+.controls-grid > *,
+.formula-grid > *,
+.toy-layout > *,
+.package-grid > * {
+  min-width: 0;
 }
 
 .points-table th {
@@ -830,6 +845,7 @@ body::before {
 .formula-card p {
   color: var(--text-muted);
   font-size: 0.91rem;
+  overflow-wrap: anywhere;
 }
 
 .display-math {
@@ -922,7 +938,7 @@ body::before {
 
 .toy-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
   gap: 18px;
   align-items: start;
 }
@@ -955,57 +971,63 @@ body::before {
   line-height: 1.45;
 }
 
-.toy-control {
+.toy-formula-panel {
   border-left: 1px solid var(--border);
   padding-left: 18px;
 }
 
-.toy-control h3 {
+.toy-formula-panel h3 {
   font-size: 0.95rem;
   margin-bottom: 8px;
 }
 
-.toy-control p {
+.toy-formula-panel p {
   color: var(--text-muted);
   font-size: 0.88rem;
   line-height: 1.55;
   margin-bottom: 12px;
 }
 
-.toy-choice-bar {
+.toy-formula-panel .display-math {
+  font-size: 0.9rem;
+}
+
+.formula-list {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 10px;
+  margin: 12px 0;
 }
 
-.toy-choice-btn {
+.formula-chip {
   border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-hrit);
   border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text-muted);
-  min-height: 36px;
-  padding: 7px 10px;
+  background: var(--surface-alt);
+  padding: 10px 12px;
   font-size: 0.86rem;
-  font-weight: 650;
-  text-align: left;
-  cursor: pointer;
+  color: var(--text);
+  overflow-x: auto;
+  min-width: 0;
 }
 
-.toy-choice-btn:hover {
-  border-color: var(--accent-hrit);
-  color: var(--accent-hrit);
-  background: var(--accent-hrit-bg);
+.toy-note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.toy-choice-btn.active {
-  border-color: var(--accent-hrit);
-  color: #065f56;
-  background: var(--accent-hrit-bg);
+.toy-note-list li {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  margin-left: 17px;
 }
 
 .toy-color-key {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 6px;
   margin-top: 14px;
   padding-top: 12px;
@@ -1020,30 +1042,37 @@ body::before {
   gap: 8px;
 }
 
-.toy-color-chip {
-  width: 13px;
-  height: 13px;
+.group-icon {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 1px solid #ffffff;
-  box-shadow: 0 0 0 1px rgba(31, 41, 51, 0.16);
+  display: inline-block;
+  border: 1px solid rgba(31, 41, 51, 0.12);
+  box-shadow: 0 0 0 2px #ffffff;
+  object-fit: cover;
+  background: #ffffff;
+}
+
+.comparison-note {
+  margin-top: 14px;
+  border: 1px solid var(--accent-hrit-border);
+  border-radius: var(--radius-sm);
+  background: var(--accent-hrit-bg);
+  padding: 13px 14px;
+  color: #065f56;
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 @media (max-width: 900px) {
   .toy-layout {
     grid-template-columns: 1fr;
   }
-  .toy-control {
+  .toy-formula-panel {
     border-left: none;
     border-top: 1px solid var(--border);
     padding-left: 0;
     padding-top: 14px;
-  }
-  .toy-choice-bar {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  .toy-choice-btn {
-    flex: 1 1 160px;
   }
 }
 
@@ -1068,7 +1097,7 @@ body::before {
   box-shadow: var(--shadow);
   padding: 18px 22px;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  grid-template-columns: 1fr;
   gap: 18px;
 }
 
@@ -1091,10 +1120,26 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  border-left: 1px solid var(--border);
-  padding-left: 18px;
   color: var(--text-muted);
   font-size: 0.88rem;
+}
+
+.marker-key-inline {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px 16px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  white-space: nowrap;
+}
+
+.marker-key-inline .marker-key-title {
+  flex: 0 0 auto;
+  margin-right: 2px;
 }
 
 .marker-key-title {
@@ -1106,6 +1151,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 9px;
+  flex: 0 0 auto;
 }
 
 .marker-sample {
@@ -1203,11 +1249,8 @@ body::before {
   .quick-guide {
     grid-template-columns: 1fr;
   }
-  .marker-key {
-    border-left: none;
-    border-top: 1px solid var(--border);
-    padding-left: 0;
-    padding-top: 14px;
+  .controls-grid {
+    grid-template-columns: 1fr;
   }
   .package-grid {
     grid-template-columns: 1fr;
@@ -1226,15 +1269,15 @@ body::before {
 <!-- ════════════════════════════════════════════ HEADER -->
 <header class="site-header">
   <div class="header-inner">
-    <h1>HRIT and CLR transformations on zero-containing compositions</h1>
+    <h1>Simplex Hellinger and Aitchison geometry for microbiome diversity</h1>
     <p class="lead">
       Compositional data usually arrive as counts. Each sample's counts \(n\)
       are normalized to a relative abundance \(\pi_i = n_i/\sum_j n_j\), and the
-      transformations act on \(\pi\). The HRIT transformation (Hellinger-Riemann
-      intrinsic coordinates) maps the closed simplex through a square-root geometry and
-      stays finite at exact zeros. The Centered Log-Ratio (CLR) transformation
-      needs strictly positive components, so any zero must be replaced first.
-      The plots below show that difference point by point.
+      geometry acts on \(\pi\). Simplex Hellinger geometry uses
+      Hellinger-Riemann intrinsic coordinates \(Z=HRIC(\pi)\), which are defined
+      on the closed simplex and stay finite at exact zeros. Aitchison geometry
+      uses log-ratio coordinates, so CLR requires strictly positive components
+      and therefore a zero-replacement rule before transformation.
     </p>
     <p class="sublead">
       The plots fix \(p=3\), the only case that draws directly in three
@@ -1252,14 +1295,8 @@ body::before {
       <ol>
         <li>Load the boundary or near-zero preset.</li>
         <li>Pick the ε scale (counts or abundance), then drag \(\varepsilon\).</li>
-        <li>Watch where the HRIT and CLR coordinates land, and check the norms below.</li>
+        <li>Watch where the HRIC and CLR coordinates land, and check the norms below.</li>
       </ol>
-    </div>
-    <div class="marker-key" aria-label="Marker style key">
-      <div class="marker-key-title">What the markers mean</div>
-      <div class="marker-key-row"><span class="marker-sample"></span><span>Filled — interior composition (no component near zero)</span></div>
-      <div class="marker-key-row"><span class="marker-sample thin"></span><span>Thin outline — a component is close to zero</span></div>
-      <div class="marker-key-row"><span class="marker-sample open"></span><span>Hollow — at least one component is exactly zero</span></div>
     </div>
   </section>
 
@@ -1280,7 +1317,7 @@ body::before {
             <table class="points-table" id="points-table">
               <thead>
                 <tr>
-                  <th style="width:80px">Point</th>
+                  <th style="width:96px">Point</th>
                   <th>n₁</th>
                   <th>n₂</th>
                   <th>n₃</th>
@@ -1339,25 +1376,31 @@ body::before {
   <!-- ── PLOTS GRID ── -->
   <div class="section-heading">
     <h2>Transformation comparison</h2>
-    <p>The same points under each transformation — HRIT applied directly, CLR applied after exact zeros are replaced.</p>
+    <p>The same points under each geometry — HRIC coordinates applied directly, CLR coordinates applied after exact zeros are replaced.</p>
+    <div class="marker-key marker-key-inline" aria-label="Marker style key">
+      <div class="marker-key-title">What the markers mean</div>
+      <div class="marker-key-row"><span class="marker-sample"></span><span>Filled — interior composition</span></div>
+      <div class="marker-key-row"><span class="marker-sample thin"></span><span>Thin outline — close to zero</span></div>
+      <div class="marker-key-row"><span class="marker-sample open"></span><span>Hollow — exact zero</span></div>
+    </div>
   </div>
 
   <div class="plots-grid">
 
-    <!-- HRIT Plot -->
+    <!-- HRIC Plot -->
     <div class="plot-card">
       <div class="plot-card-header">
         <div class="plot-card-header-inner">
           <div>
-            <div class="plot-card-title">HRIT: direct transformation on the closed simplex</div>
-            <div class="plot-card-sub">\( \pi \to q=\sqrt{\pi} \to z_{\mathrm{HRIT}}(\pi) \) &nbsp;·&nbsp; No zero replacement needed.</div>
+            <div class="plot-card-title">Simplex Hellinger: direct coordinates on the closed simplex</div>
+            <div class="plot-card-sub">\( \pi \to q=\sqrt{\pi} \to Z=HRIC(\pi) \) &nbsp;·&nbsp; No zero replacement needed.</div>
           </div>
         </div>
       </div>
       <div class="plot-legend">
         <div class="legend-item"><div class="legend-shape circle" style="border-color:#555"></div> Original composition π</div>
         <div class="legend-item"><div class="legend-shape diamond" style="border-color:#555"></div> Square-root point q = √π</div>
-        <div class="legend-item"><div class="legend-shape square" style="border-color:#555"></div> HRIT coordinate \(z_{\mathrm{HRIT}}(\pi)\)</div>
+        <div class="legend-item"><div class="legend-shape square" style="border-color:#555"></div> HRIC coordinate \(Z=HRIC(\pi)\)</div>
       </div>
       <div class="plot-div" id="hrit-plot"></div>
       <div class="plot-card-note">Points with exact zeros stay finite.</div>
@@ -1399,7 +1442,7 @@ body::before {
             <tr>
               <th>Point</th>
               <th>Contains zero?</th>
-              <th>∥z<sub>HRIT</sub>∥</th>
+              <th>∥Z<sub>HRIC</sub>∥</th>
               <th>∥z<sub>CLR</sub>(ε)∥</th>
               <th>ΔCLR vs default ε</th>
             </tr>
@@ -1418,17 +1461,17 @@ body::before {
     </div>
     <div class="formula-grid">
       <article class="formula-card hrit-card">
-        <h3>HRIT transformation</h3>
+        <h3>Simplex Hellinger coordinates</h3>
         <p>
           For a composition \( \pi \in \Delta^{p-1} \), define
           \( q_i=\sqrt{\pi_i} \), \( q_0=p^{-1/2}\mathbf{1} \),
           \( c=q^\top q_0 \), and \( s=\sqrt{1-c^2} \). Then
         </p>
         <p class="display-math">
-          \( z_{\mathrm{HRIT}}(\pi)=\frac{\arcsin(s)}{s}(q-cq_0). \)
+          \( Z=HRIC(\pi)=\frac{\arcsin(s)}{s}(q-cq_0). \)
         </p>
         <p>
-          When \(s=0\) the factor \(\arcsin(s)/s\) is read at its limit of \(1\). That happens only at the uniform composition, where \(q=q_0\) and \(z_{\mathrm{HRIT}}(\pi)=0\). Because the square root is finite at zero, the map applies to compositions with exact zeros without any preprocessing.
+          When \(s=0\) the factor \(\arcsin(s)/s\) is read at its limit of \(1\). That happens only at the uniform composition, where \(q=q_0\) and \(Z=0\). Because the square root is finite at zero, the map applies to compositions with exact zeros without any preprocessing.
         </p>
       </article>
 
@@ -1484,7 +1527,7 @@ body::before {
       <thead>
         <tr>
           <th>Property</th>
-          <th>HRIT</th>
+          <th>Simplex Hellinger geometry</th>
           <th>CLR after zero replacement</th>
         </tr>
       </thead>
@@ -1529,85 +1572,175 @@ body::before {
       <h2>Toy example with throat microbiome data</h2>
       <p>
         The GUniFrac throat data include 60 samples and 856 OTUs. Samples are
-        split by smoking status: 32 non-smokers and 28 smokers. The plots below
-        compare HRIC outputs with familiar alpha and beta diversity summaries.
+        split by smoking status: 32 non-smokers and 28 smokers. The revised
+        example focuses on diversity under Simplex Hellinger geometry, then
+        contrasts it with Aitchison geometry for downstream ordination.
       </p>
     </div>
 
     <div class="toy-example-panel">
-      <div class="toy-panel-title">Alpha diversity</div>
+      <div class="toy-panel-title">Simplex Hellinger alpha diversity</div>
       <div class="toy-layout">
         <div class="toy-plot-stack">
           <figure class="toy-figure">
             <img
-              id="toy-alpha-primary-img"
-              src="assets/toy-example/alpha-hric-dominance.png"
-              alt="Violin plot of Simplex Hellinger dominance for non-smokers and smokers in the GUniFrac throat data">
-            <figcaption id="toy-alpha-primary-caption">
-              Simplex Hellinger dominance is the raw geodesic distance
-              \(D(\pi)=\|HRIC(\pi)\|\).
-            </figcaption>
-          </figure>
-
-          <figure class="toy-figure">
-            <img
-              id="toy-alpha-secondary-img"
               src="assets/toy-example/alpha-hric-evenness.png"
-              alt="Violin plot of Simplex Hellinger evenness for non-smokers and smokers in the GUniFrac throat data">
-            <figcaption id="toy-alpha-secondary-caption">
-              Simplex Hellinger evenness is \(1-D(\pi)/\arccos(1/\sqrt{p})\).
+              alt="Violin plot of Simplex Hellinger alpha diversity evenness for non-smokers and smokers in the GUniFrac throat data">
+            <figcaption>
+              The plotted value is Simplex Hellinger alpha diversity, interpreted
+              as evenness for each sample.
             </figcaption>
           </figure>
         </div>
 
-        <div class="toy-control">
-          <h3>Choose alpha summary</h3>
-          <p>Each choice keeps the same two-group violin format so the methods can be compared directly.</p>
-          <div class="toy-choice-bar" aria-label="Alpha diversity method selector">
-            <button class="toy-choice-btn active" type="button" data-toy-alpha="hric" onclick="selectToyExample('alpha', 'hric')">Simplex Hellinger</button>
-            <button class="toy-choice-btn" type="button" data-toy-alpha="shannon" onclick="selectToyExample('alpha', 'shannon')">Shannon</button>
-            <button class="toy-choice-btn" type="button" data-toy-alpha="simpson" onclick="selectToyExample('alpha', 'simpson')">Simpson</button>
-            <button class="toy-choice-btn" type="button" data-toy-alpha="richness" onclick="selectToyExample('alpha', 'richness')">Observed richness</button>
+        <div class="toy-formula-panel">
+          <h3>Definition</h3>
+          <p>
+            Let \(Z_i=HRIC(\pi_i)\) be the centered Hellinger-Riemann intrinsic
+            coordinate for sample \(i\), and let
+            \(A_p=\arcsin\{\sqrt{1-1/p}\}\), the maximum Simplex Hellinger
+            distance from the uniform composition.
+          </p>
+          <div class="formula-list">
+            <div class="formula-chip">\(Z_i=HRIC(\pi_i)\)</div>
+            <div class="formula-chip">
+              \[
+              \alpha_{\mathrm{SH}}(\pi_i)
+              =
+              1-\frac{\|Z_i\|_2^2}{\left[\arcsin\left(\sqrt{1-1/p}\right)\right]^2}.
+              \]
+            </div>
           </div>
+          <ul class="toy-note-list">
+            <li>Values close to 1 indicate a composition close to uniform abundance across taxa.</li>
+            <li>Lower values indicate concentration toward fewer taxa, so this alpha diversity is an evenness measure.</li>
+            <li>Exact zeros are allowed because \(HRIC(\pi)\) is defined on the closed simplex.</li>
+          </ul>
           <div class="toy-color-key">
-            <span><i class="toy-color-chip" style="background:#6a9bcb"></i>Non-smoker</span>
-            <span><i class="toy-color-chip" style="background:#cb5148"></i>Smoker</span>
+            <span><img class="group-icon" src="assets/icons/non-smoker.png" alt="">Non-smoker</span>
+            <span><img class="group-icon" src="assets/icons/smoker.png" alt="">Smoker</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="toy-example-panel">
-      <div class="toy-panel-title">Beta diversity</div>
+      <div class="toy-panel-title">Simplex Hellinger beta diversity</div>
       <div class="toy-layout">
         <div class="toy-plot-stack">
           <figure class="toy-figure">
             <img
-              id="toy-beta-img"
               src="assets/toy-example/beta-hric-pcoa.png"
               alt="PCoA plot of Simplex Hellinger beta diversity for non-smokers and smokers with group ellipses">
-            <figcaption id="toy-beta-caption">
-              Simplex Hellinger beta diversity is the Euclidean distance between
-              HRIC coordinate vectors.
+            <figcaption>
+              PCoA of pairwise HRIC distances. The annotations report
+              condition-relevant turnover \(\delta\) and a PERMANOVA test for
+              smoking-status separation.
             </figcaption>
           </figure>
         </div>
 
-        <div class="toy-control">
-          <h3>Choose beta distance</h3>
-          <p>Each PCoA uses the selected pairwise distance and the same smoking-status colors.</p>
-          <div class="toy-choice-bar" aria-label="Beta diversity method selector">
-            <button class="toy-choice-btn active" type="button" data-toy-beta="hric" onclick="selectToyExample('beta', 'hric')">Simplex Hellinger</button>
-            <button class="toy-choice-btn" type="button" data-toy-beta="aitchison" onclick="selectToyExample('beta', 'aitchison')">Aitchison</button>
-            <button class="toy-choice-btn" type="button" data-toy-beta="bray" onclick="selectToyExample('beta', 'bray')">Bray-Curtis</button>
-            <button class="toy-choice-btn" type="button" data-toy-beta="jaccard" onclick="selectToyExample('beta', 'jaccard')">Jaccard</button>
+        <div class="toy-formula-panel">
+          <h3>Definition</h3>
+          <p>
+            Let \(\bar{Z}=n^{-1}\sum_{i=1}^{n}Z_i\). Gamma diversity is the
+            evenness of the cohort center, and beta diversity is the difference
+            between gamma diversity and the mean sample-level alpha diversity.
+          </p>
+          <div class="formula-list">
+            <div class="formula-chip">
+              \[
+              \gamma_{\mathrm{SH}}
+              =
+              1-\frac{\|\bar{Z}\|_2^2}{\left[\arcsin\left(\sqrt{1-1/p}\right)\right]^2}
+              \]
+            </div>
+            <div class="formula-chip">
+              \[
+              \beta_{\mathrm{SH}}
+              =
+              \gamma_{\mathrm{SH}}
+              -
+              \frac{1}{n}\sum_{i=1}^{n}\alpha_{\mathrm{SH}}(\pi_i).
+              \]
+            </div>
           </div>
+          <p>
+            In the throat example,
+            \(\bar{\alpha}_{\mathrm{SH}}=0.2413\),
+            \(\gamma_{\mathrm{SH}}=0.6062\), and
+            \(\beta_{\mathrm{SH}}=0.3649\).
+          </p>
+          <h3>Definition of \(\delta\)</h3>
+          <p>
+            Let \(\bar{Z}_1\) and \(\bar{Z}_2\) be the group centers for
+            non-smokers and smokers, with group sizes \(n_1\) and \(n_2\).
+          </p>
+          <div class="formula-list">
+            <div class="formula-chip">
+              \[
+              \beta_{\mathrm{cohort}}
+              =
+              \frac{1}{n}\sum_{i=1}^{n}\|Z_i-\bar{Z}\|_2^2
+              \]
+            </div>
+            <div class="formula-chip">
+              \[
+              \beta_{g_k}
+              =
+              \frac{1}{n_k}\sum_{g_i=k}\|Z_i-\bar{Z}_k\|_2^2,
+              \qquad k\in\{1,2\}
+              \]
+            </div>
+            <div class="formula-chip">
+              \[
+              \delta
+              =
+              \beta_{\mathrm{cohort}}
+              -
+              \frac{n_1}{n}\beta_{g_1}
+              -
+              \frac{n_2}{n}\beta_{g_2}.
+              \]
+            </div>
+          </div>
+          <p>
+            Here \(\beta_{\mathrm{cohort}}=0.8615\),
+            \(\beta_{g_1}=0.8332\), \(\beta_{g_2}=0.8063\), and
+            \(\delta=0.04085\). A positive \(\delta\) means some turnover remains
+            after subtracting the weighted within-group dispersion.
+          </p>
           <div class="toy-color-key">
-            <span><i class="toy-color-chip" style="background:#6a9bcb"></i>Non-smoker</span>
-            <span><i class="toy-color-chip" style="background:#cb5148"></i>Smoker</span>
+            <span><img class="group-icon" src="assets/icons/non-smoker.png" alt="">Non-smoker</span>
+            <span><img class="group-icon" src="assets/icons/smoker.png" alt="">Smoker</span>
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="toy-example-panel">
+      <div class="toy-panel-title">Simplex Hellinger beta diversity and Aitchison dissimilarity</div>
+      <figure class="toy-figure">
+        <img
+          src="assets/toy-example/depth-hric-clr-pca.png"
+          alt="PCA comparison of HRIC and CLR coordinates under identical biological composition with 800000 and 200000 sequencing reads">
+        <figcaption>
+          A real simulation with 856 taxa. Sequencing depth was reduced from
+          800,000 reads to 200,000 reads for matched samples, a common
+          microbiome-data scenario caused by differences in sequencing machines,
+          runs, lanes, or library yield. Lower depth turns some small counts into
+          sampling zeros; PCA was then applied to HRIC coordinates and CLR
+          coordinates with pseudocount 0.5.
+        </figcaption>
+      </figure>
+      <p class="comparison-note">
+        Under unequal sequencing capacity, the contrast becomes especially
+        important. In this depth-stress PCA, Simplex Hellinger beta diversity
+        keeps the matched high-depth and rounded low-depth samples nearly
+        overlapped, whereas Aitchison dissimilarity separates the rounded
+        lower-depth counts, indicating sensitivity to sampling zeros and the
+        CLR pseudocount.
+      </p>
     </div>
   </section>
 
@@ -1615,43 +1748,54 @@ body::before {
   <section class="package-tutorial" aria-labelledby="package-title">
     <h2 id="package-title">Use the R package</h2>
     <p>
-      The HRIC package runs the same zero-compatible transformation in R.
-      Give it a sample-by-feature table. Counts are fine; each row is normalized
+      The GitHub package implements Hellinger-Riemann intrinsic coordinates and
+      Simplex Hellinger diversity summaries for sparse compositional data. Give
+      it a sample-by-feature table; counts are fine, rows are normalized
       internally, and exact zeros can stay as zeros.
     </p>
 
     <div class="package-grid">
       <pre class="package-code"><code># Install from GitHub
-library(devtools)
-devtools::install_github("yiqianomics/HRIC")
+# install.packages("remotes")
+remotes::install_github("yiqianomics/HRIC")
 
-library(HRIC)
+# The current DESCRIPTION installs the package as ArcHellinger
+library(ArcHellinger)
 
-X <- matrix(c(10, 20, 30,
-               5, 15, 80,
-               0, 10, 90),
-            nrow = 3,
-            byrow = TRUE)
+X <- matrix(
+  c(10, 20, 30,
+     5, 15, 80,
+     0, 10, 90,
+    40,  5,  5),
+  nrow = 4,
+  byrow = TRUE,
+  dimnames = list(paste0("sample", 1:4),
+                  paste0("taxon", 1:3))
+)
 
 # Hellinger-Riemann intrinsic coordinates
-z <- HRIC(X)
+Z <- HRIC(X)
 
 # Reference-based coordinates; default reference is the last column
-zr <- RHRIC(X)
+ZR <- RHRIC(X)
 
-# Simplex Hellinger alpha diversity
-alpha <- Simplex_Hellinger_alpha(X, measure = "both")
+# Simplex Hellinger diversity summaries
+alpha <- SHalpha(X)        # per-sample alpha diversity, as evenness
+gamma <- SHgamma(X)        # gamma diversity of the cohort center
+beta  <- SHbeta(X)         # additive beta diversity: gamma - mean(alpha)
 
-# Simplex Hellinger beta diversity
-beta <- Simplex_Hellinger_beta(X, output = "matrix")</code></pre>
+group <- c("A", "A", "B", "B")
+delta <- SHdelta(X, group) # between-group turnover</code></pre>
 
       <div class="function-list">
         <h3>What each function returns</h3>
         <ul>
-          <li><code>HRIC(X)</code> gives centered coordinates for every sample.</li>
-          <li><code>RHRIC(X)</code> gives reference-based coordinates, using the last column by default.</li>
-          <li><code>Simplex_Hellinger_alpha(X)</code> gives normalized dominance or evenness.</li>
-          <li><code>Simplex_Hellinger_beta(X)</code> gives pairwise sample distances.</li>
+          <li><code>HRIC(X)</code> returns an <code>n x p</code> centered coordinate matrix.</li>
+          <li><code>RHRIC(X, reference)</code> returns reference-based coordinates with <code>p - 1</code> columns; the reference defaults to the last column.</li>
+          <li><code>SHalpha(X)</code> returns per-sample Simplex Hellinger alpha diversity, interpreted as evenness.</li>
+          <li><code>SHgamma(X)</code> returns gamma diversity: the evenness of the cohort center.</li>
+          <li><code>SHbeta(X)</code> returns the additive beta diversity, \( \gamma - \operatorname{mean}(\alpha) \).</li>
+          <li><code>SHdelta(X, group)</code> returns between-group turnover after removing group-size weighted within-group dispersion.</li>
         </ul>
       </div>
     </div>
@@ -1660,7 +1804,7 @@ beta <- Simplex_Hellinger_beta(X, output = "matrix")</code></pre>
 </main>
 
 <footer class="site-footer">
-  Yiqian Zhang · Updated June 2026 · <span>Version: 2026-06-28</span>
+  Yiqian Zhang · Updated July 2026 · <span>Version: 2026-07-04</span>
 </footer>
 
 <!-- ════════════════════════════════════════════ JAVASCRIPT -->
@@ -2028,9 +2172,8 @@ function makeLayout(title, axisRange, view = {}) {
     autosize:true,
     height:640,
     paper_bgcolor:'#ffffff',
-    margin:{l:0,r:0,t:42,b:0},
+    margin:{l:0,r:0,t:0,b:0},
     showlegend:false,
-    title:{text:title, x:0.5, font:{size:14, color:'#1f2933'}},
     scene:{
       uirevision:'keep-camera',
       domain:{x:domainX, y:[0, 1]},
@@ -2048,7 +2191,7 @@ const plotConfig = {
 };
 
 // ────────────────────────────────────────────────────────────
-// RENDER HRIT
+// RENDER HRIC
 // ────────────────────────────────────────────────────────────
 function renderHRIT() {
   const valid = validCompositions();
@@ -2056,7 +2199,7 @@ function renderHRIT() {
   const activeColors = valid.map(item => COLORS[item.index]);
   const pointLabels = valid.map(item => `Point ${item.index + 1}`);
   if (Pi.length === 0) {
-    Plotly.react('hrit-plot', [], makeLayout('HRIT: direct transformation', [-1.25, 1.25], HRIT_VIEW), plotConfig);
+    Plotly.react('hrit-plot', [], makeLayout('HRIC coordinates', [-1.25, 1.25], HRIT_VIEW), plotConfig);
     return;
   }
   const compositionClasses = Pi.map(compositionClass);
@@ -2075,11 +2218,11 @@ function renderHRIT() {
     ...arrowTracesDash(Q, Z, activeColors),
     pointsTrace(Pi, 'Original composition π', 'circle',  5, 0.95, activeColors, compositionClasses, pointLabels),
     pointsTrace(Q,  'Square-root point q = √π',  'diamond', 6, 0.95, activeColors, compositionClasses, pointLabels),
-    pointsTrace(Z,  'HRIT coordinate z_HRIT(π)', 'square',  6, 0.95, activeColors, compositionClasses, pointLabels)
+    pointsTrace(Z,  'HRIC coordinate Z = HRIC(π)', 'square',  6, 0.95, activeColors, compositionClasses, pointLabels)
   ].flat();
 
   const axR = [-1.25, 1.25];
-  const layout = makeLayout('HRIT: direct transformation', axR, HRIT_VIEW);
+  const layout = makeLayout('HRIC coordinates', axR, HRIT_VIEW);
   Plotly.react('hrit-plot', traces, layout, plotConfig);
 }
 
@@ -2094,7 +2237,7 @@ function renderCLR() {
   const eps = state.eps;
   const subtitle = document.getElementById('clr-subtitle');
   if (Pi.length === 0) {
-    Plotly.react('clr-plot', [], makeLayout(`CLR after zero replacement (ε = ${formatEps(eps)})`, [-1.6, 1.6], CLR_VIEW), plotConfig);
+    Plotly.react('clr-plot', [], makeLayout('CLR coordinates', [-1.6, 1.6], CLR_VIEW), plotConfig);
     subtitle.innerHTML =
       `\\( \\pi \\to r(\\pi;\\varepsilon) \\to z_{\\mathrm{CLR}}(\\pi;\\varepsilon) \\) &nbsp;·&nbsp; Enter at least one row with a positive total to draw CLR.`;
     if (window.MathJax?.typesetPromise) MathJax.typesetPromise([subtitle]);
@@ -2125,7 +2268,7 @@ function renderCLR() {
     pointsTrace(CLR,    'CLR coordinate z_CLR(π; ε)', 'square',  6, 0.95, activeColors, compositionClasses, pointLabels)
   ].flat();
 
-  const layout = makeLayout(`CLR after zero replacement (ε = ${formatEps(eps)})`, axR, CLR_VIEW);
+  const layout = makeLayout('CLR coordinates', axR, CLR_VIEW);
   Plotly.react('clr-plot', traces, layout, plotConfig);
 
   const howText = state.epsMode === 'absolute'
@@ -2198,7 +2341,7 @@ function renderTable() {
     const abundance = isInvalid ? null : pt.map(x => x / total);
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td>
+      <td class="point-cell">
         <span class="color-swatch" style="background:${COLORS[i]}"></span>
         <span class="pt-label" style="margin-left:6px">Point ${i+1}</span>
       </td>
@@ -2364,112 +2507,6 @@ function renderReadout() {
     `;
     tbody.appendChild(tr);
   });
-}
-
-// ────────────────────────────────────────────────────────────
-// TOY EXAMPLE FIGURE SWITCHER
-// ────────────────────────────────────────────────────────────
-const TOY_EXAMPLE = {
-  alpha: {
-    hric: {
-      primarySrc: 'assets/toy-example/alpha-hric-dominance.png',
-      primaryAlt: 'Violin plot of Simplex Hellinger dominance for non-smokers and smokers in the GUniFrac throat data',
-      primaryCaption: 'Simplex Hellinger dominance is the raw geodesic distance \\(D(\\pi)=\\|HRIC(\\pi)\\|\\).',
-      secondarySrc: 'assets/toy-example/alpha-hric-evenness.png',
-      secondaryAlt: 'Violin plot of Simplex Hellinger evenness for non-smokers and smokers in the GUniFrac throat data',
-      secondaryCaption: 'Simplex Hellinger evenness is \\(1-D(\\pi)/\\arccos(1/\\sqrt{p})\\).'
-    },
-    shannon: {
-      primarySrc: 'assets/toy-example/alpha-shannon-diversity.png',
-      primaryAlt: 'Violin plot of Shannon diversity for non-smokers and smokers in the GUniFrac throat data',
-      primaryCaption: 'Shannon diversity summarizes entropy of the relative-abundance profile.',
-      secondarySrc: 'assets/toy-example/alpha-shannon-evenness.png',
-      secondaryAlt: 'Violin plot of Pielou evenness for non-smokers and smokers in the GUniFrac throat data',
-      secondaryCaption: 'Pielou evenness scales Shannon diversity by the log of observed richness.'
-    },
-    simpson: {
-      primarySrc: 'assets/toy-example/alpha-simpson-diversity.png',
-      primaryAlt: 'Violin plot of Simpson diversity for non-smokers and smokers in the GUniFrac throat data',
-      primaryCaption: 'The Gini-Simpson index emphasizes abundant taxa and is bounded between 0 and 1.',
-      secondarySrc: 'assets/toy-example/alpha-simpson-evenness.png',
-      secondaryAlt: 'Violin plot of Simpson evenness for non-smokers and smokers in the GUniFrac throat data',
-      secondaryCaption: 'Simpson evenness divides inverse Simpson diversity by observed richness.'
-    },
-    richness: {
-      primarySrc: 'assets/toy-example/alpha-richness-observed.png',
-      primaryAlt: 'Violin plot of observed richness for non-smokers and smokers in the GUniFrac throat data',
-      primaryCaption: 'Observed richness counts the number of OTUs detected in each sample.',
-      secondarySrc: 'assets/toy-example/alpha-richness-relative.png',
-      secondaryAlt: 'Violin plot of relative observed richness for non-smokers and smokers in the GUniFrac throat data',
-      secondaryCaption: 'Relative richness divides observed OTUs by the total number of OTUs in the table.'
-    }
-  },
-  beta: {
-    hric: {
-      src: 'assets/toy-example/beta-hric-pcoa.png',
-      alt: 'PCoA plot of Simplex Hellinger beta diversity for non-smokers and smokers with group ellipses',
-      caption: 'Simplex Hellinger beta diversity is the Euclidean distance between HRIC coordinate vectors.'
-    },
-    aitchison: {
-      src: 'assets/toy-example/beta-aitchison-pcoa.png',
-      alt: 'PCoA plot of Aitchison distance for non-smokers and smokers with group ellipses',
-      caption: 'Aitchison distance is computed as Euclidean distance between CLR coordinates after a 0.5 pseudocount.'
-    },
-    bray: {
-      src: 'assets/toy-example/beta-bray-pcoa.png',
-      alt: 'PCoA plot of Bray-Curtis distance for non-smokers and smokers with group ellipses',
-      caption: 'Bray-Curtis is an abundance-based community dissimilarity.'
-    },
-    jaccard: {
-      src: 'assets/toy-example/beta-jaccard-pcoa.png',
-      alt: 'PCoA plot of Jaccard distance for non-smokers and smokers with group ellipses',
-      caption: 'Jaccard distance uses presence-absence patterns rather than abundance.'
-    }
-  }
-};
-
-function setToyButtonState(kind, key) {
-  document.querySelectorAll(`[data-toy-${kind}]`).forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute(`data-toy-${kind}`) === key);
-  });
-}
-
-function renderToyMath(...nodes) {
-  if (window.MathJax && window.MathJax.typesetPromise) {
-    window.MathJax.typesetPromise(nodes).catch(() => {});
-  }
-}
-
-function selectToyExample(kind, key) {
-  const item = TOY_EXAMPLE[kind] && TOY_EXAMPLE[kind][key];
-  if (!item) return;
-
-  setToyButtonState(kind, key);
-
-  if (kind === 'alpha') {
-    const primaryImg = document.getElementById('toy-alpha-primary-img');
-    const primaryCaption = document.getElementById('toy-alpha-primary-caption');
-    const secondaryImg = document.getElementById('toy-alpha-secondary-img');
-    const secondaryCaption = document.getElementById('toy-alpha-secondary-caption');
-
-    primaryImg.src = item.primarySrc;
-    primaryImg.alt = item.primaryAlt;
-    primaryCaption.innerHTML = item.primaryCaption;
-
-    secondaryImg.src = item.secondarySrc;
-    secondaryImg.alt = item.secondaryAlt;
-    secondaryCaption.innerHTML = item.secondaryCaption;
-
-    renderToyMath(primaryCaption, secondaryCaption);
-    return;
-  }
-
-  const betaImg = document.getElementById('toy-beta-img');
-  const betaCaption = document.getElementById('toy-beta-caption');
-  betaImg.src = item.src;
-  betaImg.alt = item.alt;
-  betaCaption.innerHTML = item.caption;
-  renderToyMath(betaCaption);
 }
 
 // ────────────────────────────────────────────────────────────
