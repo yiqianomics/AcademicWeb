@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Introduction | HRIC</title>
+  <meta name="description" content="Motivation for HRIC and Simplex Hellinger geometry in sparse compositional microbiome data.">
+  <link rel="stylesheet" href="../assets/hric-site.css">
+  <script defer src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script defer src="../assets/hric-diagnostic.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="../index.html">
+        HRIC
+        <span>Simplex Hellinger diversity</span>
+      </a>
+      <div class="nav-links">
+        <a href="../introduction/index.html" aria-current="page">Introduction</a>
+        <a href="../framework/index.html">HRIC framework</a>
+        <a href="../whittaker/index.html">Whittaker review</a>
+        <a href="../framework/index.html#software">R package</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="masthead">
+      <div class="wrap">
+        <p class="breadcrumbs"><a href="../index.html">Home</a> / Introduction</p>
+        <h1>Why Simplex Hellinger geometry?</h1>
+        <p class="lead">
+          Microbiome sequencing produces counts, but ecological interpretation is usually compositional. HRIC starts from that constraint and works with the geometry induced by Hellinger distance on the simplex.
+        </p>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Compositional data</p>
+            <h2>Counts are observed under a fixed-sum constraint</h2>
+          </div>
+          <p>
+            A sample-by-feature table records sequencing reads, not absolute microbial biomass. After normalization, each sample lies in the simplex:
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="note-card accent-blue">
+            <h3>From counts to composition</h3>
+            <div class="formula">
+              $$\pi_i = \left(\frac{x_{i1}}{\sum_j x_{ij}},\ldots,\frac{x_{ip}}{\sum_j x_{ij}}\right), \qquad \sum_{j=1}^{p}\pi_{ij}=1.$$
+            </div>
+            <p>
+              The components are relative abundances. An increase in one component must be balanced by decreases elsewhere, so ordinary Euclidean operations on raw proportions can misrepresent the sample relationship.
+            </p>
+          </div>
+
+          <div class="note-card accent-green">
+            <h3>Zeros are ecological and technical</h3>
+            <p>
+              Exact zeros can reflect true absence, limited sampling, taxon filtering, or detection limits. Simplex Hellinger geometry treats these boundary compositions as valid inputs rather than forcing replacement before transformation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band alt">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Two geometries</p>
+            <h2>Two geometries, two zero behaviors</h2>
+          </div>
+          <p>
+            Aitchison geometry is foundational for compositional data analysis, but the centered log-ratio transform is undefined at exact zeros. HRIC instead uses an intrinsic coordinate representation associated with Hellinger geometry, where boundary points remain valid.
+          </p>
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Geometry</th>
+              <th>Coordinate map</th>
+              <th>Exact zeros</th>
+              <th>Interpretive focus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Simplex Hellinger</td>
+              <td>$Z_i = \mathrm{HRIC}(\pi_i)$</td>
+              <td>Included directly as boundary compositions</td>
+              <td>Hellinger-scale displacement from the uniform center and turnover around cohort or group centers</td>
+            </tr>
+            <tr>
+              <td>Aitchison</td>
+              <td>$\mathrm{clr}(\pi_i)_j = \log \pi_{ij} - p^{-1}\sum_k \log \pi_{ik}$</td>
+              <td>Requires a zero-replacement rule or pseudocount</td>
+              <td>Log-ratio variation among strictly positive compositions</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Geometric diagnostic</p>
+            <h2>Input counts, transformation comparison, and ε-sensitivity</h2>
+          </div>
+          <p>
+            A five-point diagnostic gives a compact check of the geometry. The same input profiles are read by HRIC directly, while CLR requires a stated rule for replacing exact zeros.
+          </p>
+        </div>
+
+        <div class="diagnostic-panel">
+          <div>
+            <h3 class="subsection-title first">Input counts</h3>
+            <div class="table-wrap">
+              <table class="points-table" aria-label="Editable input counts">
+                <thead>
+                  <tr>
+                    <th>Point</th>
+                    <th>Editable counts</th>
+                    <th>Normalized composition $\pi$</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="points-tbody"></tbody>
+              </table>
+            </div>
+            <div class="preset-row" aria-label="Composition presets">
+              <button class="preset-btn" type="button" data-preset="interior">Interior</button>
+              <button class="preset-btn" type="button" data-preset="boundary">Boundary</button>
+              <button class="preset-btn" type="button" data-preset="nearZero">Near-zero</button>
+              <button class="preset-btn" type="button" data-preset="reset">Reset</button>
+            </div>
+            <p class="numeric-note">
+              Enter nonnegative counts. Each row with a positive total is normalized before HRIC or CLR is evaluated; an all-zero row is not a valid composition.
+            </p>
+          </div>
+
+          <div class="eps-section">
+            <h3>CLR replacement parameter $\varepsilon$</h3>
+            <p>
+              Used only for zero components before the log-ratio map.
+            </p>
+            <label class="eps-input-row" for="eps-number">
+              <span>$\varepsilon =$</span>
+              <input type="number" class="eps-number-input" id="eps-number" min="0.000001" max="0.1" step="0.000001" value="0.001">
+            </label>
+            <input type="range" class="eps-slider" id="eps-slider" min="-6" max="-1" step="0.01" value="-3" aria-label="CLR zero replacement value epsilon">
+            <div class="eps-range-labels">
+              <span>10^-6</span><span>10^-5</span><span>10^-4</span><span>10^-3</span><span>10^-2</span><span>10^-1</span>
+            </div>
+            <label class="check-row">
+              <input type="checkbox" id="lock-clr-scale" checked>
+              <span>Fixed CLR axis limits</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="marker-row" aria-label="Marker key">
+          <strong>What the markers mean</strong>
+          <span class="marker-key-item"><span class="marker-symbol"></span>Filled: interior composition</span>
+          <span class="marker-key-item"><span class="marker-symbol thin"></span>Thin outline: close to zero</span>
+          <span class="marker-key-item"><span class="marker-symbol hollow"></span>Hollow: exact zero</span>
+        </div>
+
+        <h3 class="subsection-title">Transformation comparison</h3>
+        <div class="plots-grid">
+          <div class="plot-card">
+            <div class="plot-card-header">
+              <h3>HRIC coordinates on the closed simplex</h3>
+            </div>
+            <div class="transform-path" aria-label="HRIC transformation path">
+              <span class="path-token">$\pi$</span>
+              <span class="path-arrow">to</span>
+              <span class="path-token">$q=\sqrt{\pi}$</span>
+              <span class="path-arrow">to</span>
+              <span class="path-token">$Z=\mathrm{HRIC}(\pi)$</span>
+            </div>
+            <div class="plot-legend">
+              <span class="legend-item"><span class="legend-shape circle"></span>Original composition $\pi$</span>
+              <span class="legend-item"><span class="legend-shape diamond"></span>Square-root point $q=\sqrt{\pi}$</span>
+              <span class="legend-item"><span class="legend-shape square"></span>HRIC coordinate $Z$</span>
+            </div>
+            <div class="plot-div" id="hric-plot" aria-label="HRIC transformation comparison plot"></div>
+          </div>
+
+          <div class="plot-card">
+            <div class="plot-card-header">
+              <h3>CLR coordinates after replacement</h3>
+            </div>
+            <div class="transform-path" aria-label="CLR transformation path">
+              <span class="path-token">$\pi$</span>
+              <span class="path-arrow">to</span>
+              <span class="path-token">$r(\pi;\varepsilon)$</span>
+              <span class="path-arrow">to</span>
+              <span class="path-token">$\mathrm{clr}(r)$</span>
+            </div>
+            <div class="plot-legend">
+              <span class="legend-item"><span class="legend-shape circle"></span>Original composition $\pi$</span>
+              <span class="legend-item"><span class="legend-shape diamond"></span>Zero-replaced composition $r(\pi;\varepsilon)$</span>
+              <span class="legend-item"><span class="legend-shape square"></span>CLR coordinate</span>
+            </div>
+            <div class="plot-div" id="clr-plot" aria-label="CLR transformation comparison plot"></div>
+          </div>
+        </div>
+
+        <h3 class="subsection-title">Coordinate norms and ε-sensitivity</h3>
+        <div class="table-wrap">
+          <table class="comparison-table readout-table">
+            <thead>
+              <tr>
+                <th>Point</th>
+                <th>Zero status</th>
+                <th>$\|Z_{\mathrm{HRIC}}\|_2$</th>
+                <th>$\|Z_{\mathrm{CLR}}(\varepsilon)\|_2$</th>
+                <th>$\Delta_{\mathrm{CLR}}$ from $\varepsilon=10^{-3}$</th>
+              </tr>
+            </thead>
+            <tbody id="readout-tbody"></tbody>
+          </table>
+        </div>
+        <p class="numeric-note">
+          Coordinate norms are rounded to three decimals. HRIC and CLR norms live on different coordinate scales, so this readout is a sensitivity diagnostic rather than a direct effect-size comparison. $\Delta_{\mathrm{CLR}}=\|\mathrm{clr}(r(\pi;\varepsilon))-\mathrm{clr}(r(\pi;10^{-3}))\|_2$ shows how far a point drifts as $\varepsilon$ changes.
+        </p>
+      </div>
+    </section>
+
+    <section class="band alt">
+      <div class="wrap">
+        <div class="grid-2">
+          <div>
+            <p class="section-kicker">Motivation</p>
+            <h2>Sequencing depth can manufacture apparent structure</h2>
+            <p>
+              Unequal sequencing capacity is common across microbiome studies because samples can be processed on different sequencing machines, batches, lanes, or read-depth targets. When the same biological composition is observed at lower depth, small counts are more likely to become sampling zeros.
+            </p>
+            <p class="mt-16">
+              In this simulation, 60 samples were first generated at 800,000 reads. Matched low-depth samples represent the same underlying compositions observed at 200,000 reads, so rare features are more frequently rounded to zero. PCA was then applied to HRIC coordinates and to CLR coordinates with pseudocount 0.5.
+            </p>
+          </div>
+          <div class="figure-shell">
+            <img src="../assets/toy-example/depth-hric-clr-pca.png" alt="PCA under reduced sequencing depth comparing HRIC and CLR coordinates">
+            <p class="caption">
+              HRIC coordinates show substantial overlap between depth groups. CLR coordinates separate the same biological samples by sequencing depth, indicating a depth-driven artifact from zero replacement and log-ratio sensitivity.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Connection</p>
+            <h2>The geometry supports diversity partitioning</h2>
+          </div>
+          <p>
+            Once samples are represented as HRIC coordinates, within-sample evenness, cohort diversity, and condition-relevant turnover can be computed in one coordinate system. The framework page defines these summaries formally.
+          </p>
+        </div>
+        <div class="button-row">
+          <a class="button" href="../framework/index.html">Continue to HRIC framework</a>
+          <a class="button secondary" href="../whittaker/index.html">Review Whittaker theory</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="band alt">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">References</p>
+            <h2>Introduction sources</h2>
+          </div>
+          <p>
+            These sources ground the compositional and ecological geometry used in the motivation.
+          </p>
+        </div>
+        <div class="reference-list">
+          <ol>
+            <li>Aitchison, J. (1982). The statistical analysis of compositional data. <em>Journal of the Royal Statistical Society: Series B</em>. <a href="https://doi.org/10.1111/j.2517-6161.1982.tb01195.x">doi:10.1111/j.2517-6161.1982.tb01195.x</a>.</li>
+            <li>Aitchison, J. (1986). <em>The Statistical Analysis of Compositional Data</em>. Chapman and Hall. <a href="https://doi.org/10.1007/978-94-009-4109-0">doi:10.1007/978-94-009-4109-0</a>.</li>
+            <li>Legendre, P., & Gallagher, E. D. (2001). Ecologically meaningful transformations for ordination of species data. <em>Oecologia</em>. <a href="https://doi.org/10.1007/s004420100716">doi:10.1007/s004420100716</a>.</li>
+            <li>Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., & Egozcue, J. J. (2017). Microbiome datasets are compositional: and this is not optional. <em>Frontiers in Microbiology</em>. <a href="https://doi.org/10.3389/fmicb.2017.02224">doi:10.3389/fmicb.2017.02224</a>.</li>
+            <li>Quinn, T. P., Erb, I., Richardson, M. F., & Crowley, T. M. (2018). Understanding sequencing data as compositions: an outlook and review. <em>Bioinformatics</em>. <a href="https://doi.org/10.1093/bioinformatics/bty175">doi:10.1093/bioinformatics/bty175</a>.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>HRIC research site</span>
+      <span><a href="https://github.com/yiqianomics/HRIC">HRIC on GitHub</a></span>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Whittaker Review | HRIC</title>
+  <meta name="description" content="Review of Whittaker alpha, beta, and gamma diversity theory and its connection to HRIC.">
+  <link rel="stylesheet" href="../assets/hric-site.css">
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="../index.html">
+        HRIC
+        <span>Simplex Hellinger diversity</span>
+      </a>
+      <div class="nav-links">
+        <a href="../introduction/index.html">Introduction</a>
+        <a href="../framework/index.html">HRIC framework</a>
+        <a href="../whittaker/index.html" aria-current="page">Whittaker review</a>
+        <a href="../framework/index.html#software">R package</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="masthead">
+      <div class="wrap">
+        <p class="breadcrumbs"><a href="../index.html">Home</a> / Whittaker review</p>
+        <h1>Whittaker's alpha-beta-gamma diversity theory</h1>
+        <p class="lead">
+          Whittaker's framework separates the diversity observed within local communities, the diversity observed across a broader region, and the differentiation among communities that links the two.
+        </p>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Ecological partition</p>
+            <h2>Local diversity, regional diversity, and turnover</h2>
+          </div>
+          <p>
+            The alpha-beta-gamma vocabulary was developed for ecological communities across space. It remains useful for microbiome cohorts because each sample can be treated as a local community and the study population as the broader assemblage.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <div class="note-card accent-blue">
+            <h3>Alpha diversity</h3>
+            <p>
+              Alpha diversity describes diversity within a local unit: a plot, site, host, body site, or sample. It is the within-community component of the partition.
+            </p>
+          </div>
+          <div class="note-card accent-green">
+            <h3>Gamma diversity</h3>
+            <p>
+              Gamma diversity describes diversity across the larger region or cohort. It asks what diversity is represented by the pooled or collective assemblage.
+            </p>
+          </div>
+          <div class="note-card accent-pink">
+            <h3>Beta diversity</h3>
+            <p>
+              Beta diversity describes differentiation among local units. It increases when communities are compositionally distinct from each other.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band alt">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Classical forms</p>
+            <h2>Whittaker diversity has multiplicative and additive expressions</h2>
+          </div>
+          <p>
+            For species richness, Whittaker's classical beta diversity is often expressed as a ratio between regional and mean local diversity. Later diversity-partitioning work also uses additive decompositions.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="note-card accent-blue">
+            <h3>Multiplicative partition</h3>
+            <div class="formula">
+              $$\beta_{\mathrm{W}} = \frac{\gamma}{\bar\alpha}.$$
+            </div>
+            <p>
+              This form asks how many effective local communities are represented by the regional assemblage. When all local communities are similar, $\beta_{\mathrm{W}}$ is close to 1.
+            </p>
+          </div>
+
+          <div class="note-card accent-green">
+            <h3>Additive partition</h3>
+            <div class="formula">
+              $$\beta_{\mathrm{add}} = \gamma - \bar\alpha.$$
+            </div>
+            <p>
+              This form measures the amount of regional diversity not explained by average within-community diversity. It is especially natural when alpha and gamma are defined on the same bounded scale.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Connection to HRIC</p>
+            <h2>HRIC carries Whittaker's structure into sparse compositional geometry</h2>
+          </div>
+          <p>
+            The HRIC framework keeps the ecological logic of within-cohort partitioning, but it changes the measurement scale. Diversity is not computed from raw richness counts; it is computed from Hellinger-Riemann intrinsic coordinates of compositions.
+          </p>
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Whittaker concept</th>
+              <th>HRIC analogue</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Alpha diversity</td>
+              <td>$\alpha_i = 1 - \|Z_i\|_2^2/A_p^2$</td>
+              <td>Within-sample evenness measured by displacement from the uniform composition.</td>
+            </tr>
+            <tr>
+              <td>Gamma diversity</td>
+              <td>$\gamma = 1 - \|\bar Z\|_2^2/A_p^2$</td>
+              <td>Cohort-level evenness measured at the HRIC coordinate center.</td>
+            </tr>
+            <tr>
+              <td>Beta diversity</td>
+              <td>$\beta = \gamma - n^{-1}\sum_i\alpha_i$</td>
+              <td>Among-sample turnover remaining after average within-sample evenness.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="band alt">
+      <div class="wrap">
+        <div class="grid-2">
+          <div>
+            <p class="section-kicker">Why this distinction matters</p>
+            <h2>Microbiome diversity needs both ecological language and compositional geometry</h2>
+            <p>
+              Whittaker's terms provide the conceptual question: what is within-sample diversity, what is cohort-level diversity, and how much turnover separates samples or conditions? HRIC provides a coordinate system where that question can be asked for sparse relative-abundance data without first replacing exact zeros.
+            </p>
+          </div>
+          <div class="note-card accent-pink">
+            <h3>Practical consequence</h3>
+            <p>
+              The alpha-beta-gamma language transfers naturally to microbiome cohorts, but the measurement scale changes. HRIC's additive partition is a geometry-aware diversity partition, not a direct replacement for species-richness ratios.
+            </p>
+            <div class="button-row">
+              <a class="button" href="../framework/index.html">Return to HRIC framework</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">References</p>
+            <h2>Whittaker review sources</h2>
+          </div>
+          <p>
+            These references cover alpha-beta-gamma terminology and later diversity partitioning work.
+          </p>
+        </div>
+        <div class="reference-list">
+          <ol>
+            <li>Whittaker, R. H. (1960). Vegetation of the Siskiyou Mountains, Oregon and California. <em>Ecological Monographs</em>. <a href="https://doi.org/10.2307/1943563">doi:10.2307/1943563</a>.</li>
+            <li>Whittaker, R. H. (1972). Evolution and measurement of species diversity. <em>Taxon</em>. <a href="https://doi.org/10.2307/1218190">doi:10.2307/1218190</a>.</li>
+            <li>Lande, R. (1996). Statistics and partitioning of species diversity, and similarity among multiple communities. <em>Oikos</em>. <a href="https://doi.org/10.2307/3545743">doi:10.2307/3545743</a>.</li>
+            <li>Jost, L. (2007). Partitioning diversity into independent alpha and beta components. <em>Ecology</em>. <a href="https://doi.org/10.1890/06-1736.1">doi:10.1890/06-1736.1</a>.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>HRIC research site</span>
+      <span><a href="https://github.com/yiqianomics/HRIC">HRIC on GitHub</a></span>
+    </div>
+  </footer>
+</body>
+</html>

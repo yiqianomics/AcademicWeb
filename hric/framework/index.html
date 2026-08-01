@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HRIC Framework | Simplex Hellinger Diversity</title>
+  <meta name="description" content="Definitions for Simplex Hellinger alpha, gamma, beta, and condition-relevant turnover using HRIC coordinates.">
+  <link rel="stylesheet" href="../assets/hric-site.css">
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="../index.html">
+        HRIC
+        <span>Simplex Hellinger diversity</span>
+      </a>
+      <div class="nav-links">
+        <a href="../introduction/index.html">Introduction</a>
+        <a href="../framework/index.html" aria-current="page">HRIC framework</a>
+        <a href="../whittaker/index.html">Whittaker review</a>
+        <a href="#software">R package</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="masthead">
+      <div class="wrap">
+        <p class="breadcrumbs"><a href="../index.html">Home</a> / HRIC framework</p>
+        <h1>Simplex Hellinger diversity partition</h1>
+        <p class="lead">
+          HRIC defines alpha, gamma, and beta diversity in one intrinsic coordinate system. Alpha measures within-sample evenness, gamma measures cohort-level evenness, and beta is the residual turnover among samples.
+        </p>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Coordinate foundation</p>
+            <h2>Hellinger-Riemann intrinsic coordinates</h2>
+          </div>
+          <p>
+            Let $\pi_i$ be the normalized composition for sample $i$ over $p$ taxa. HRIC maps $\pi_i$ to an intrinsic coordinate vector $Z_i$ on the Simplex Hellinger geometry.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="note-card accent-blue">
+            <h3>Coordinate map</h3>
+            <div class="formula">
+              $$Z_i = \mathrm{HRIC}(\pi_i), \qquad A_p = \arcsin\sqrt{1-\frac{1}{p}}.$$
+            </div>
+            <p>
+              $A_p$ is the maximal Hellinger-geodesic displacement from the uniform composition to a simplex vertex. It normalizes the diversity summaries to a unit scale.
+            </p>
+          </div>
+
+          <div class="note-card accent-green">
+            <h3>Interpretive anchor</h3>
+            <p>
+              Samples near the uniform center have small $\|Z_i\|_2^2$ and high evenness. Samples concentrated on a few taxa have larger displacement from the center and lower evenness.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band alt">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Alpha and gamma</p>
+            <h2>Evenness within samples and across the cohort</h2>
+          </div>
+          <p>
+            Alpha diversity is defined sample by sample. Gamma diversity applies the same evenness scale to the cohort center $\bar Z$.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="note-card accent-blue">
+            <h3>Simplex Hellinger alpha diversity</h3>
+            <div class="formula">
+              $$\alpha_i = 1 - \frac{\|Z_i\|_2^2}{A_p^2}.$$
+            </div>
+            <p>
+              This alpha diversity is an evenness measure. Values closer to 1 indicate a composition closer to the uniform center; lower values indicate stronger dominance by a subset of taxa.
+            </p>
+          </div>
+
+          <div class="note-card accent-green">
+            <h3>Simplex Hellinger gamma diversity</h3>
+            <div class="formula">
+              $$\gamma = 1 - \frac{\|\bar Z\|_2^2}{A_p^2}, \qquad \bar Z = \frac{1}{n}\sum_{i=1}^{n} Z_i.$$
+            </div>
+            <p>
+              Gamma describes the diversity represented by the cohort center in HRIC space. It increases when the cohort center is closer to the uniform composition.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Beta and turnover</p>
+            <h2>Among-sample structure in HRIC space</h2>
+          </div>
+          <p>
+            Beta diversity is the difference between cohort-level gamma diversity and mean within-sample alpha diversity. Condition-relevant turnover isolates the part of total dispersion that is explained by separation among conditions.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="note-card accent-pink">
+            <h3>Simplex Hellinger beta diversity</h3>
+            <div class="formula">
+              $$\beta = \gamma - \frac{1}{n}\sum_{i=1}^{n}\alpha_i.$$
+            </div>
+            <p>
+              Larger beta indicates more heterogeneity among sample compositions after alpha evenness is accounted for through the HRIC coordinate center.
+            </p>
+          </div>
+
+          <div class="note-card accent-blue">
+            <h3>Condition-relevant turnover</h3>
+            <div class="formula">
+              $$\delta = \beta_{\mathrm{cohort}} - \sum_{g=1}^{G}\frac{n_g}{n}\beta_g,$$
+              $$\beta_{\mathrm{cohort}} = \frac{1}{n}\sum_i \|Z_i-\bar Z\|_2^2, \qquad
+              \beta_g = \frac{1}{n_g}\sum_{i\in g}\|Z_i-\bar Z_g\|_2^2.$$
+            </div>
+            <p>
+              $\delta$ compares total cohort dispersion with weighted within-condition dispersion. A positive value indicates turnover associated with condition-level separation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band alt">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Throat microbiome example</p>
+            <h2>Non-smoker and smoker groups under HRIC</h2>
+          </div>
+          <p>
+            This throat microbiome contrast illustrates how Simplex Hellinger evenness, beta structure, and condition-relevant turnover are read together.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="figure-shell">
+            <img src="../assets/toy-example/alpha-hric-evenness.png" alt="Simplex Hellinger alpha evenness by non-smoker and smoker groups">
+            <p class="caption">
+              Simplex Hellinger alpha diversity summarizes within-sample evenness for each group, with sample-level markers shown over the group distributions.
+            </p>
+          </div>
+
+          <div class="figure-shell">
+            <img src="../assets/toy-example/beta-hric-pcoa.png" alt="Simplex Hellinger beta diversity PCoA by smoking status with delta and PERMANOVA p-value">
+            <p class="caption">
+              PCoA of HRIC-based Simplex Hellinger beta diversity with condition-relevant turnover $\delta$ and the PERMANOVA p-value for the group contrast.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="software">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Software</p>
+            <h2>R package interface</h2>
+          </div>
+          <p>
+            The HRIC repository implements Hellinger-Riemann intrinsic coordinates and Simplex Hellinger diversity summaries. The functions take a sample-by-feature table; count rows are normalized internally, and exact zeros are accepted.
+          </p>
+        </div>
+
+        <div class="code-card">
+<pre><code># Install from GitHub
+# install.packages("remotes")
+remotes::install_github("yiqianomics/HRIC")
+
+# Load the installed package namespace
+library(ArcHellinger)
+
+X &lt;- matrix(
+  c(10, 20, 30,
+     5, 15, 80,
+     0, 10, 90,
+    40,  5,  5),
+  nrow = 4,
+  byrow = TRUE,
+  dimnames = list(paste0("sample", 1:4),
+                  paste0("taxon", 1:3))
+)
+
+# Hellinger-Riemann intrinsic coordinates
+Z &lt;- HRIC(X)
+
+# Reference-based coordinates
+ZR &lt;- RHRIC(X)
+
+# Simplex Hellinger diversity summaries
+alpha &lt;- SHalpha(X)
+gamma &lt;- SHgamma(X)
+beta &lt;- SHbeta(X)
+
+# Condition-relevant turnover
+group &lt;- c("Non-smoker", "Non-smoker", "Smoker", "Smoker")
+delta &lt;- SHdelta(X, group)</code></pre>
+        </div>
+
+        <div class="grid-3 mt-22">
+          <div class="note-card">
+            <h3>Coordinates</h3>
+            <p><code>HRIC(X)</code> returns centered intrinsic coordinates. <code>RHRIC(X)</code> returns reference-based coordinates.</p>
+          </div>
+          <div class="note-card">
+            <h3>Diversity</h3>
+            <p><code>SHalpha(X)</code>, <code>SHgamma(X)</code>, and <code>SHbeta(X)</code> implement the Simplex Hellinger alpha, gamma, and beta summaries defined on this page.</p>
+          </div>
+          <div class="note-card">
+            <h3>Turnover</h3>
+            <p><code>SHdelta(X, group)</code> computes condition-relevant turnover by contrasting cohort dispersion with weighted within-condition dispersion.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band alt">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">References</p>
+            <h2>Framework sources</h2>
+          </div>
+          <p>
+            These references support the geometry, ordination, and testing context used by the framework.
+          </p>
+        </div>
+        <div class="reference-list">
+          <ol>
+            <li>Legendre, P., & Gallagher, E. D. (2001). Ecologically meaningful transformations for ordination of species data. <em>Oecologia</em>. <a href="https://doi.org/10.1007/s004420100716">doi:10.1007/s004420100716</a>.</li>
+            <li>Anderson, M. J. (2001). A new method for non-parametric multivariate analysis of variance. <em>Austral Ecology</em>. <a href="https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x">doi:10.1111/j.1442-9993.2001.01070.pp.x</a>.</li>
+            <li>HRIC R package. <a href="https://github.com/yiqianomics/HRIC">github.com/yiqianomics/HRIC</a>.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>HRIC research site</span>
+      <span><a href="https://github.com/yiqianomics/HRIC">HRIC on GitHub</a></span>
+    </div>
+  </footer>
+</body>
+</html>

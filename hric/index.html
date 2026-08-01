@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HRIC | Simplex Hellinger Diversity</title>
+  <meta name="description" content="Research site for HRIC, Simplex Hellinger geometry, and alpha-gamma-beta diversity partitioning for sparse microbiome compositions.">
+  <link rel="stylesheet" href="assets/hric-site.css">
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="./" aria-label="HRIC home">
+        HRIC
+        <span>Simplex Hellinger diversity</span>
+      </a>
+      <div class="nav-links">
+        <a href="introduction/index.html">Introduction</a>
+        <a href="framework/index.html">HRIC framework</a>
+        <a href="whittaker/index.html">Whittaker review</a>
+        <a href="framework/index.html#software">R package</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="eyebrow">Sparse compositional microbiome data</p>
+        <h1>HRIC: Simplex Hellinger diversity for alpha, gamma, and beta structure</h1>
+        <p class="lead">
+          Hellinger-Riemann intrinsic coordinates represent microbiome compositions directly on the simplex, retaining boundary compositions while supporting diversity summaries and ordination.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="framework/index.html">Read the framework</a>
+          <a class="button secondary" href="introduction/index.html">Read introduction</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Research structure</p>
+            <h2>Three views of the same problem</h2>
+          </div>
+          <p>
+            The site is organized as a compact research narrative: the compositional geometry problem, the HRIC alpha-gamma-beta construction, and the classical diversity theory that motivates the partition.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <article class="feature-card">
+            <div>
+              <p class="number">01 Introduction</p>
+              <h3>Geometry, zeros, and sequencing depth</h3>
+              <p>
+                Microbiome tables are constrained compositions. The introduction explains why zero handling and sequencing depth can distort CLR-based ordination, and why Simplex Hellinger geometry offers a stable coordinate system.
+              </p>
+            </div>
+            <a href="introduction/index.html">Read introduction</a>
+          </article>
+
+          <article class="feature-card">
+            <div>
+              <p class="number">02 HRIC framework</p>
+              <h3>Simplex Hellinger diversity partition</h3>
+              <p>
+                HRIC maps each sample into intrinsic coordinates. Alpha diversity is an evenness score, gamma summarizes the cohort center, and beta is the remaining among-sample turnover.
+              </p>
+            </div>
+            <a href="framework/index.html">Read framework</a>
+          </article>
+
+          <article class="feature-card">
+            <div>
+              <p class="number">03 Theory review</p>
+              <h3>Whittaker alpha-beta-gamma diversity</h3>
+              <p>
+                Whittaker's alpha, beta, and gamma terminology separates local diversity, regional diversity, and compositional differentiation. The review clarifies how that ecological idea connects to HRIC.
+              </p>
+            </div>
+            <a href="whittaker/index.html">Read review</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band alt">
+      <div class="wrap">
+        <div class="grid-2">
+          <div>
+            <p class="section-kicker">Central idea</p>
+            <h2>Diversity as geometry on the simplex</h2>
+            <p>
+              For a sample composition $\pi_i$ with $p$ taxa, HRIC gives intrinsic coordinates $Z_i = \mathrm{HRIC}(\pi_i)$. The same coordinate system supports within-sample evenness, cohort-level gamma diversity, and between-condition turnover without requiring artificial replacement of exact zeros.
+            </p>
+            <div class="formula">
+              $$\alpha_i = 1 - \frac{\|Z_i\|_2^2}{\left[\arcsin\sqrt{1-1/p}\right]^2}, \qquad
+              \beta = \gamma - \frac{1}{n}\sum_{i=1}^{n}\alpha_i$$
+            </div>
+          </div>
+          <div class="figure-shell">
+            <img src="assets/toy-example/beta-hric-pcoa.png" alt="PCoA of Simplex Hellinger beta diversity by smoking status">
+            <p class="caption">
+              HRIC coordinates support cohort-level beta structure, condition-relevant turnover, and formal group comparison in the same geometric system.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">References</p>
+            <h2>Foundational sources</h2>
+          </div>
+          <p>
+            The pages cite the ecological diversity literature, compositional data analysis, Hellinger transformations in community ecology, and the HRIC software implementation.
+          </p>
+        </div>
+        <div class="reference-list">
+          <ol>
+            <li>Whittaker, R. H. (1960). Vegetation of the Siskiyou Mountains, Oregon and California. <em>Ecological Monographs</em>. <a href="https://doi.org/10.2307/1943563">doi:10.2307/1943563</a>.</li>
+            <li>Whittaker, R. H. (1972). Evolution and measurement of species diversity. <em>Taxon</em>. <a href="https://doi.org/10.2307/1218190">doi:10.2307/1218190</a>.</li>
+            <li>Aitchison, J. (1982). The statistical analysis of compositional data. <em>Journal of the Royal Statistical Society: Series B</em>. <a href="https://doi.org/10.1111/j.2517-6161.1982.tb01195.x">doi:10.1111/j.2517-6161.1982.tb01195.x</a>.</li>
+            <li>Legendre, P., & Gallagher, E. D. (2001). Ecologically meaningful transformations for ordination of species data. <em>Oecologia</em>. <a href="https://doi.org/10.1007/s004420100716">doi:10.1007/s004420100716</a>.</li>
+            <li>HRIC R package. <a href="https://github.com/yiqianomics/HRIC">github.com/yiqianomics/HRIC</a>.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>HRIC research site</span>
+      <span><a href="https://github.com/yiqianomics/HRIC">HRIC on GitHub</a></span>
+    </div>
+  </footer>
+</body>
+</html>
