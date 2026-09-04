@@ -57,6 +57,9 @@
         --warn: #b45309;
         --warn-bg: #fef3c7;
         --warn-line: #fde68a;
+        --preprint: #6d28d9;
+        --preprint-bg: #ede9fe;
+        --preprint-line: #c4b5fd;
         --surface: #ffffff;
         --surface-soft: #f8fafc;
         --surface-glass: rgba(255, 255, 255, 0.78);
@@ -111,6 +114,9 @@
         --warn: #fbbf24;
         --warn-bg: rgba(245, 158, 11, 0.14);
         --warn-line: rgba(251, 191, 36, 0.34);
+        --preprint: #c4b5fd;
+        --preprint-bg: rgba(139, 92, 246, 0.16);
+        --preprint-line: rgba(196, 181, 253, 0.38);
         --surface: #111b2b;
         --surface-soft: #162236;
         --surface-glass: rgba(17, 27, 43, 0.82);
@@ -890,6 +896,12 @@
         gap: 10px;
       }
 
+      .publication .publication-submission {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
       .publication-details {
         display: grid;
         grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
@@ -944,6 +956,17 @@
         object-fit: contain;
       }
 
+      .publication-figure--framework {
+        width: 100%;
+        max-width: 600px;
+        justify-self: center;
+      }
+
+      .publication-figure--framework img {
+        height: auto;
+        max-height: none;
+      }
+
       .publication-figure figcaption {
         margin-top: 10px;
         color: var(--subtle);
@@ -979,6 +1002,12 @@
         border-color: var(--warn-line);
         background: var(--warn-bg);
         color: var(--warn);
+      }
+
+      .tag.preprint {
+        border-color: var(--preprint-line);
+        background: var(--preprint-bg);
+        color: var(--preprint);
       }
 
       .tag.topic {
@@ -1499,9 +1528,63 @@
             <button class="publication-filter" type="button" data-publication-filter="microbiome" aria-pressed="false">Microbiome</button>
             <button class="publication-filter" type="button" data-publication-filter="diversity-analysis" aria-pressed="false">Diversity Analysis</button>
           </div>
-          <span class="publication-count" id="publication-count" aria-live="polite">Showing 4 of 4 publications</span>
+          <span class="publication-count" id="publication-count" aria-live="polite">Showing 5 of 5 publications</span>
         </div>
         <div class="panel publication-list">
+          <article class="publication" data-topic="diversity-analysis">
+            <p class="publication-citation">
+              <strong>Y. Zhang</strong> and Z. Zhu.
+              "<a href="https://www.biorxiv.org/content/10.64898/2026.09.02.748976v1" target="_blank" rel="noopener noreferrer">Rebuilding microbiome diversity theory on the closed simplex.</a>"
+              <em>bioRxiv</em>.
+            </p>
+            <div class="publication-meta">
+              <b><time datetime="2026-09-03">Sep 3, 2026</time></b>
+              <span class="tag topic">Diversity Analysis</span>
+              <span class="tag preprint">Preprint</span>
+              <a href="https://www.biorxiv.org/content/10.64898/2026.09.02.748976v1" target="_blank" rel="noopener noreferrer">bioRxiv &middot; Version 1</a>
+            </div>
+            <p class="publication-submission">Submitted to <em>npj Biofilms and Microbiomes</em>.</p>
+            <div class="publication-details">
+              <div class="publication-abstract">
+                <h3>Abstract summary</h3>
+                <p>
+                  Microbiome studies often report within-sample diversity and between-sample distances without clearly
+                  defining how local communities relate to a larger regional ensemble. This work develops a common
+                  framework for making those relationships explicit. Hellinger&ndash;Riemann intrinsic coordinates (HRIC)
+                  represent compositional data on the closed simplex while preserving zero-valued taxa. Within this
+                  representation, local and regional diversity, additive between-community diversity, individual taxon
+                  contributions, distances between samples, and variation explained by statistical models can be analyzed
+                  together. Simulations connect HRIC-based dispersion to the between-condition component of PERMANOVA.
+                  Applications to Arctic and North Atlantic microbial communities reveal comparable relationships between
+                  relative local diversity and vertical environmental gradients. In an autologous fecal microbiota
+                  transplantation trial, recipients recovered toward their own baseline compositions earlier, while
+                  alpha-diversity differences were less clear. Together, the results connect diversity partitioning with
+                  compositional analysis across environmental, host-associated, and longitudinal microbiome studies.
+                </p>
+              </div>
+              <figure class="publication-figure publication-figure--framework">
+                <a
+                  href="personal-assets/hric-framework.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open the full-resolution HRIC framework as a vector PDF"
+                >
+                  <img
+                    src="personal-assets/hric-framework.png"
+                    alt="Four-panel HRIC framework showing local and regional diversity, microbial regions, dissimilarity and association, and zero-compatible coordinates on the closed simplex"
+                    width="1800"
+                    height="1350"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+                <figcaption>
+                  HRIC framework for microbial diversity and dissimilarity. Author-provided figure.
+                  <a href="personal-assets/hric-framework.pdf" target="_blank" rel="noopener noreferrer">View vector PDF.</a>
+                </figcaption>
+              </figure>
+            </div>
+          </article>
           <article class="publication" data-topic="diversity-analysis">
             <p class="publication-citation">
               Z. Zhu, <strong>Y. Zhang</strong>, S. Lin, and L. Zhang. "DeSHAPE: Decomposing Ecological Structure through
@@ -1800,6 +1883,7 @@
 
       if (publicationToolbar && publicationCount && publicationButtons.length && publications.length) {
         publicationToolbar.hidden = false;
+        publicationCount.textContent = `Showing ${publications.length} of ${publications.length} publications`;
 
         publicationButtons.forEach((button) => {
           button.addEventListener("click", () => {
