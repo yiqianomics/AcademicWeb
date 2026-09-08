@@ -1,0 +1,13 @@
+student_id,major,study_hours,attendance_pct,quiz_score,completed
+S001,Mathematics,2.5,78,68,TRUE
+S002,Biology,4.0,92,84,TRUE
+S003,Public Health,1.5,70,61,FALSE
+S004,Mathematics,5.5,96,93,TRUE
+S005,Biology,3.0,85,76,TRUE
+S006,Public Health,2.0,74,65,FALSE
+S007,Mathematics,4.5,88,87,TRUE
+S008,Biology,1.0,62,55,FALSE
+S009,Public Health,3.5,90,81,TRUE
+S010,Mathematics,2.8,82,73,TRUE
+S011,Biology,4.2,94,89,TRUE
+S012,Public Health,1.8,68,60,FALSE

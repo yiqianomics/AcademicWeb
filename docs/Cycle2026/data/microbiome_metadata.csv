@@ -1,0 +1,6 @@
+sample_id,group,body_site,batch,sample_type
+S1,Control,Gut,1,Biological
+S2,Control,Gut,1,Biological
+S3,Treatment,Gut,1,Biological
+S4,Treatment,Gut,2,Biological
+B1,Blank,Not applicable,1,Negative control

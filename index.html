@@ -699,6 +699,30 @@
         font-weight: 800;
       }
 
+      .mentor-resource {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 9px 12px;
+      }
+
+      .student-resource-link {
+        display: inline-flex;
+        min-height: 34px;
+        align-items: center;
+        padding: 3px 10px;
+        border: 1px solid var(--accent-line);
+        border-radius: 7px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 0.85rem;
+        font-weight: 780;
+      }
+
+      .student-resource-link:hover {
+        border-color: var(--accent);
+      }
+
       .muted {
         color: var(--subtle);
       }
@@ -1777,10 +1801,11 @@
             <article class="card">
               <h3>Mentor</h3>
               <p><span class="meta">Aug 2026 - Present</span></p>
-              <p>
+              <p class="mentor-resource">
                 <strong>
                   <a href="https://math.osu.edu/cycle" target="_blank" rel="noopener noreferrer">Cycle (MATH 1193), Department of Mathematics, OSU</a>
                 </strong>
+                <a class="student-resource-link" href="Cycle2026/">For students: Cycle 2026 tutorials <span aria-hidden="true">&nbsp;&rarr;</span></a>
               </p>
               <ul class="plain-list">
                 <li>Mentor undergraduate students in mathematics research through OSU Cycle.</li>

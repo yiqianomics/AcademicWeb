@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="An introductory R tutorial covering objects, vectors, data frames, data transformation with dplyr, visualization with ggplot2, and reproducible analysis."
+    />
+    <title>R Foundations | Cycle 2026 Tutorials</title>
+    <script>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem("yiqian-theme-override");
+          if (savedTheme === "light" || savedTheme === "dark") {
+            document.documentElement.dataset.theme = savedTheme;
+            document.documentElement.style.colorScheme = savedTheme;
+          }
+        } catch (_) {
+          /* Follow the system theme when storage is unavailable. */
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="assets/tutorial.css?v=20260908-3" />
+  </head>
+  <body>
+    <a class="skip-link" href="#lesson">Skip to lesson content</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="home-link" href="../"><span aria-hidden="true">&larr;</span> Yiqian Zhang</a>
+        <span class="course-label">Cycle 2026 Tutorials</span>
+      </div>
+    </header>
+
+    <section class="page-intro" aria-labelledby="page-title">
+      <h1 id="page-title">R Foundations</h1>
+      <p class="lead">
+        This tutorial introduces R objects and vectors, rectangular data, transformation with dplyr, visualization with
+        ggplot2, and reproducible project organization. Examples use a synthetic student dataset.
+      </p>
+    </section>
+
+    <div class="book-switcher-wrap">
+      <nav class="book-switcher" aria-label="Tutorials">
+        <span>Tutorials</span>
+        <a href="./" aria-current="page">R Foundations</a>
+        <a href="microbiome/">Microbiome Data Basics</a>
+      </nav>
+    </div>
+
+    <div class="book-layout">
+      <aside class="toc">
+        <p class="toc-title">On this page</p>
+        <nav aria-label="R tutorial chapters">
+          <ol>
+            <li><a href="#r-start">Getting started</a></li>
+            <li><a href="#r-types">Objects and data types</a></li>
+            <li><a href="#r-vectors">Vectors and missing values</a></li>
+            <li><a href="#r-data">Datasets and import</a></li>
+            <li><a href="#r-wrangle">Transform and summarize</a></li>
+            <li><a href="#r-visualize">Visualize with ggplot2</a></li>
+            <li><a href="#r-workflow">Reproducible workflow</a></li>
+            <li><a href="#r-practice">Exercises and reference</a></li>
+          </ol>
+        </nav>
+        <div class="toc-downloads">
+          <p class="toc-title">Practice data</p>
+          <a href="data/r_student_scores.csv" download>Download r_student_scores.csv</a>
+        </div>
+      </aside>
+
+      <main class="book" id="lesson" tabindex="-1">
+        <section class="r-runtime" aria-labelledby="r-runtime-title" data-r-runtime>
+          <div class="r-runtime-row">
+            <div>
+              <p class="r-runtime-title" id="r-runtime-title">Interactive R examples</p>
+              <p class="r-runtime-message" role="status" aria-live="polite" aria-atomic="true" data-r-runtime-message>
+                Edit a runnable example and select <strong>Run</strong> to execute it.
+              </p>
+            </div>
+            <button class="r-runtime-retry" type="button" data-r-runtime-retry hidden>Retry loading R</button>
+          </div>
+          <p class="r-runtime-detail">
+            <strong>Reset code</strong> restores the original example. Each block runs independently. The first run downloads
+            the browser-based R runtime and requires an internet connection. Long-running code cannot be interrupted;
+            reload the page if execution stalls.
+          </p>
+          <noscript>
+            <p class="r-noscript">JavaScript is required to run examples; all code and expected output remain readable.</p>
+          </noscript>
+        </section>
+
+        <section class="chapter" id="r-start">
+          <span class="chapter-number">Chapter 1</span>
+          <h2>Getting started with R</h2>
+          <p>
+            <strong>R</strong> is a programming language and statistical computing environment. <strong>RStudio</strong>
+            is an integrated development environment (IDE) for editing scripts, running R, inspecting objects, and viewing plots.
+          </p>
+
+          <h3>Install R and RStudio</h3>
+          <p>
+            Runnable examples on this page require no local installation. File-based analyses and saved outputs use a
+            local installation of R and RStudio.
+          </p>
+          <ol>
+            <li>
+              Install the current version of <a href="https://cran.r-project.org/" target="_blank" rel="noopener noreferrer">R from CRAN</a>.
+              Choose the download for your operating system and follow its installer.
+            </li>
+            <li>
+              Install <a href="https://posit.co/download/rstudio-desktop/" target="_blank" rel="noopener noreferrer">RStudio Desktop</a>,
+              then open it. R must be installed first.
+            </li>
+            <li>
+              In RStudio, choose <strong>File &rarr; New Project &rarr; New Directory &rarr; New Project</strong>, choose a
+              name and location, then select <strong>Create Project</strong>.
+            </li>
+            <li>
+              Choose <strong>File &rarr; New File &rarr; R Script</strong>. Type <code>2 + 2</code>, leave the cursor on that
+              line, then click <strong>Run</strong> or press <strong>Cmd+Enter</strong> on macOS / <strong>Ctrl+Enter</strong>
+              on Windows or Linux. You should see <code>[1] 4</code> in the Console.
+            </li>
+            <li>
+              Save the script as <code>analysis.R</code>. In the Files pane, use <strong>New Folder</strong> three times to
+              create <code>data</code>, <code>figures</code>, and <code>results</code> inside the project.
+            </li>
+          </ol>
+
+          <div class="callout note">
+            <p class="callout-title">Console and scripts</p>
+            <p>Use the Console for temporary commands and scripts as the reproducible record of an analysis.</p>
+          </div>
+
+          <h3>Your first commands</h3>
+          <div class="code-block" data-r-runnable data-r-context="base">
+            <div class="code-label"><span>R</span><span>First commands</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code># Anything after # is a comment.
+2 + 2
+
+minutes &lt;- 90
+hours &lt;- minutes / 60
+hours
+
+mean(c(3, 6, 9))
+round(10 / 3, digits = 2)</code></pre>
+          </div>
+          <div class="output expected-output"><strong class="output-label">Expected output for the original code</strong>[1] 4
+[1] 1.5
+[1] 6
+[1] 3.33</div>
+          <p>
+            The assignment arrow <code>&lt;-</code> stores a value in an <strong>object</strong>. R usually prints
+            nothing when an object is created. Type the object name to see its value. The <code>[1]</code> in printed
+            output marks the position of the first displayed value; it is not part of the answer.
+          </p>
+
+          <h3>How to read a function call</h3>
+          <div class="formula"><code>round(10 / 3, digits = 2)</code></div>
+          <ul>
+            <li><code>round</code> is the function: the action R will perform.</li>
+            <li>The values inside parentheses are inputs, called arguments.</li>
+            <li><code>digits = 2</code> is a named argument that changes how the function behaves.</li>
+            <li>The returned value is the result.</li>
+          </ul>
+
+          <div class="callout warning">
+            <p class="callout-title">Messages, warnings, and errors</p>
+            <p>
+              Messages report context or progress. Warnings identify potential problems while evaluation continues;
+              errors stop the current expression. Read the condition message before revising the code.
+            </p>
+          </div>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <span></span>
+            <a href="#r-types">Next: Objects and data types &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="r-types">
+          <span class="chapter-number">Chapter 2</span>
+          <h2>Objects and data types</h2>
+          <p>
+            An object is a name that points to a value in memory. The value has a <strong>type</strong>, which tells R
+            which operations make sense. Adding numbers makes sense; adding two student IDs does not.
+          </p>
+
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Common R data types and classes</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Type or class</th>
+                  <th scope="col">Purpose</th>
+                  <th scope="col">Example</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">logical</th><td>True or false</td><td><code>TRUE</code>, <code>FALSE</code></td></tr>
+                <tr><th scope="row">integer</th><td>Whole number stored explicitly as an integer</td><td><code>12L</code></td></tr>
+                <tr><th scope="row">double</th><td>General numeric value</td><td><code>12</code>, <code>3.14</code></td></tr>
+                <tr><th scope="row">character</th><td>Text and identifiers</td><td><code>"S001"</code>, <code>"Biology"</code></td></tr>
+                <tr><th scope="row">factor</th><td>Categories with defined levels</td><td>Control, Treatment</td></tr>
+                <tr><th scope="row">Date</th><td>Calendar date</td><td><code>as.Date("2026-09-08")</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-block" data-r-runnable data-r-context="base">
+            <div class="code-label"><span>R</span><span>Create and inspect objects</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>student_id &lt;- "S001"
+quiz_score &lt;- 84
+completed &lt;- TRUE
+lesson_date &lt;- as.Date("2026-09-08")
+
+class(student_id)
+class(quiz_score)
+class(completed)
+class(lesson_date)
+
+typeof(quiz_score)</code></pre>
+          </div>
+          <p>
+            <code>class()</code> reports the class used by most analysis methods; <code>typeof()</code> reports the
+            underlying storage type.
+          </p>
+
+          <div class="callout note">
+            <p class="callout-title">Identifiers are usually text</p>
+            <p>
+              Store an ID such as <code>"S001"</code> as character data. Arithmetic on an ID is meaningless, and
+              converting it to a number can erase leading zeros.
+            </p>
+          </div>
+
+          <h3>Explicit type conversion</h3>
+          <div class="code-block" data-r-runnable data-r-context="base">
+            <div class="code-label"><span>R</span><span>Convert only when the meaning is clear</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>text_number &lt;- "42"
+as.numeric(text_number)
+
+condition &lt;- factor(
+  c("Control", "Treatment", "Control"),
+  levels = c("Control", "Treatment")
+)
+
+levels(condition)</code></pre>
+          </div>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#r-start">&larr; Previous</a>
+            <a href="#r-vectors">Next: Vectors and missing values &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="r-vectors">
+          <span class="chapter-number">Chapter 3</span>
+          <h2>Vectors and missing values</h2>
+          <p>
+            A <strong>vector</strong> is an ordered, one-dimensional collection. Ordinary atomic vectors contain one
+            type. Many R operations are vectorized: one instruction is applied to every element.
+          </p>
+
+          <div class="code-block" data-r-runnable data-r-context="base">
+            <div class="code-label"><span>R</span><span>Create, inspect, and subset a vector</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>scores &lt;- c(68, 84, NA, 93, 76)
+
+length(scores)
+scores[2]
+scores[c(1, 4)]
+scores[-3]
+
+scores + 5
+scores &gt;= 80</code></pre>
+          </div>
+          <div class="output expected-output"><strong class="output-label">Expected output for the original code</strong>[1] 5
+[1] 84
+[1] 68 93
+[1] 68 84 93 76
+[1] 73 89 NA 98 81
+[1] FALSE TRUE NA TRUE FALSE</div>
+          <p>
+            R indexing starts at <strong>1</strong>. A positive index keeps a position; a negative index removes it.
+            The missing element stays missing because R cannot determine the result of arithmetic or comparison for an
+            unknown value.
+          </p>
+
+          <h3>Zero and missing are different</h3>
+          <dl class="definition-list">
+            <dt><code>0</code></dt><dd>A known numeric value equal to zero.</dd>
+            <dt><code>NA</code></dt><dd>The value is unavailable or unknown.</dd>
+            <dt><code>"0"</code></dt><dd>A character string containing the symbol zero.</dd>
+            <dt><code>""</code></dt><dd>An empty character string; it is not automatically missing.</dd>
+          </dl>
+
+          <div class="code-block" data-r-runnable data-r-context="scores">
+            <div class="code-label"><span>R</span><span>Work with missing values deliberately</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>mean(scores)
+mean(scores, na.rm = TRUE)
+
+is.na(scores)
+sum(is.na(scores))
+sum(scores &gt;= 80, na.rm = TRUE)</code></pre>
+          </div>
+          <div class="output expected-output"><strong class="output-label">Expected output for the original code</strong>[1] NA
+[1] 80.25
+[1] FALSE FALSE TRUE FALSE FALSE
+[1] 1
+[1] 2</div>
+
+          <div class="callout warning">
+            <p class="callout-title">Do not test missingness with ==</p>
+            <p>
+              <code>NA == NA</code> returns <code>NA</code>, not <code>TRUE</code>, because two unknown values cannot be
+              proven equal. Use <code>is.na(x)</code>. Count missing values before deciding whether to remove them.
+            </p>
+          </div>
+
+          <h3>Vector constructors</h3>
+          <div class="code-block" data-r-runnable data-r-context="base">
+            <div class="code-label"><span>R</span><span>Three ways to build sequences</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>1:5
+seq(from = 0, to = 1, by = 0.25)
+rep(c("A", "B"), times = 3)</code></pre>
+          </div>
+
+          <details>
+            <summary>Exercise: Convert 160, 172, and 168 centimeters to meters</summary>
+            <div class="code-block" data-r-runnable data-r-context="base">
+              <div class="code-label"><span>Solution</span><span>Vectorized division</span></div>
+              <pre tabindex="0" aria-label="Scrollable code example"><code>height_cm &lt;- c(160, 172, 168)
+height_m &lt;- height_cm / 100
+height_m
+# 1.60 1.72 1.68</code></pre>
+            </div>
+          </details>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#r-types">&larr; Previous</a>
+            <a href="#r-data">Next: Datasets and import &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="r-data">
+          <span class="chapter-number">Chapter 4</span>
+          <h2>Datasets and importing data</h2>
+          <p>
+            In R, rectangular data are typically stored as data frames or tibbles. Rows represent observations, columns
+            represent variables, and cells contain individual values.
+          </p>
+
+          <figure class="diagram">
+            <svg viewBox="0 0 760 285" role="img" aria-labelledby="r-table-title r-table-desc">
+              <title id="r-table-title">Rows, columns, and cells in a rectangular dataset</title>
+              <desc id="r-table-desc">A small table where one row is highlighted as an observation, one column as a variable, and one intersection as a cell.</desc>
+              <rect x="116" y="35" width="510" height="210" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M116 77H626M116 119H626M116 161H626M116 203H626M246 35V245M386 35V245M506 35V245" stroke="currentColor" stroke-width="1.3"/>
+              <rect x="117" y="120" width="508" height="40" fill="var(--plot-red)" opacity=".14"/>
+              <rect x="387" y="36" width="118" height="208" fill="var(--plot-blue)" opacity=".12"/>
+              <rect x="387" y="120" width="118" height="40" fill="var(--plot-red)" opacity=".36"/>
+              <text x="150" y="63" fill="currentColor" font-size="16">student_id</text>
+              <text x="280" y="63" fill="currentColor" font-size="16">major</text>
+              <text x="407" y="63" fill="currentColor" font-size="16">hours</text>
+              <text x="534" y="63" fill="currentColor" font-size="16">score</text>
+              <text x="22" y="146" fill="currentColor" font-size="16">one row</text>
+              <path d="M86 141H108" stroke="currentColor" stroke-width="2"/>
+              <text x="402" y="271" fill="currentColor" font-size="16">one column</text>
+              <text x="640" y="146" fill="currentColor" font-size="16">one cell</text>
+              <path d="M620 141H636" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <figcaption>
+              A cell belongs to both a row and a column. Its meaning comes from the observation identified by the row and
+              the variable named by the column.
+            </figcaption>
+          </figure>
+
+          <h3>Download and import the practice file</h3>
+          <p>
+            <a href="data/r_student_scores.csv" download>Download <code>r_student_scores.csv</code></a>, place it inside
+            your project’s <code>data</code> folder, and run the following code.
+          </p>
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Desktop R only &middot; install and import</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code># Run this once on your computer:
+install.packages("tidyverse")
+
+# Run this at the beginning of each new session:
+library(tidyverse)
+
+students &lt;- read_csv(
+  "data/r_student_scores.csv",
+  show_col_types = FALSE
+)</code></pre>
+          </div>
+
+          <div class="callout note">
+            <p class="callout-title">Use project-relative paths</p>
+            <p>
+              Project-relative paths remain valid when the project directory is moved or shared; user-specific absolute
+              paths do not. Use <code>getwd()</code> to inspect the current working directory.
+            </p>
+          </div>
+
+          <h3>Inspect before analyzing</h3>
+          <div class="code-block" data-r-runnable data-r-context="students-dplyr">
+            <div class="code-label"><span>R</span><span>These commands do not change the data</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>students
+glimpse(students)
+dim(students)
+names(students)
+head(students, 3)
+summary(students)
+
+colSums(is.na(students))
+anyDuplicated(students$student_id)</code></pre>
+          </div>
+          <p>
+            <code>glimpse()</code> shows column types and sample values. <code>dim()</code> should return 12 rows and 6
+            columns. <code>anyDuplicated()</code> returns 0 when no repeated ID is found. These checks should precede
+            transformation and analysis.
+          </p>
+
+          <h3>Select values by name or position</h3>
+          <div class="code-block" data-r-runnable data-r-context="students">
+            <div class="code-label"><span>R</span><span>Columns, cells, and small tables</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>students$quiz_score
+students[["quiz_score"]]
+students$quiz_score[4]
+students[1:3, c("student_id", "quiz_score")]</code></pre>
+          </div>
+          <p>
+            The first two forms return the same score vector. The third returns the fourth score, 93. The final command
+            returns a small two-column table. Prefer column names over numeric column positions in an analysis script.
+          </p>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#r-vectors">&larr; Previous</a>
+            <a href="#r-wrangle">Next: Transform and summarize &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="r-wrangle">
+          <span class="chapter-number">Chapter 5</span>
+          <h2>Transform and summarize a dataset</h2>
+          <p>
+            The native pipe <code>|&gt;</code> passes the result on its left to the next function call. Pipelines express
+            transformations in execution order.
+          </p>
+
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Core dplyr verbs</caption>
+              <thead><tr><th scope="col">Verb</th><th scope="col">Question it answers</th></tr></thead>
+              <tbody>
+                <tr><th scope="row"><code>select()</code></th><td>Which columns do I need?</td></tr>
+                <tr><th scope="row"><code>filter()</code></th><td>Which rows meet a condition?</td></tr>
+                <tr><th scope="row"><code>arrange()</code></th><td>In what order should rows appear?</td></tr>
+                <tr><th scope="row"><code>mutate()</code></th><td>Which new or changed columns do I need?</td></tr>
+                <tr><th scope="row"><code>summarise()</code></th><td>Which compact summary should I calculate?</td></tr>
+                <tr><th scope="row"><code>group_by()</code></th><td>For which categories should I repeat that summary?</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-block" data-r-runnable data-r-context="students-dplyr">
+            <div class="code-label"><span>R</span><span>Rows, columns, and ordering</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code># Keep three columns.
+students |&gt;
+  select(student_id, major, quiz_score)
+
+# Keep rows where completed is TRUE and score is at least 80.
+students |&gt;
+  filter(completed == TRUE, quiz_score &gt;= 80)
+
+# Highest quiz score first.
+students |&gt;
+  arrange(desc(quiz_score))</code></pre>
+          </div>
+          <p>
+            Inside <code>filter()</code>, commas mean AND. Use <code>|</code> for OR and <code>%in%</code> to match any
+            value in a set. <code>select()</code> changes columns; <code>filter()</code> changes rows.
+          </p>
+          <ul>
+            <li>The first result has 12 rows and only 3 columns.</li>
+            <li>The filter returns S002, S004, S007, S009, and S011.</li>
+            <li>The descending arrangement begins with S004, whose quiz score is 93.</li>
+          </ul>
+
+          <div class="code-block" data-r-runnable data-r-context="students-dplyr">
+            <div class="code-label"><span>R</span><span>Create variables and grouped summaries</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>students_prepared &lt;- students |&gt;
+  mutate(
+    study_minutes = study_hours * 60,
+    major = factor(
+      major,
+      levels = c("Mathematics", "Biology", "Public Health")
+    )
+  )
+
+major_summary &lt;- students_prepared |&gt;
+  group_by(major) |&gt;
+  summarise(
+    students = n(),
+    completed = sum(completed == TRUE),
+    mean_hours = mean(study_hours),
+    mean_score = mean(quiz_score),
+    .groups = "drop"
+  )
+
+major_summary</code></pre>
+          </div>
+
+          <p>
+            Assignment creates a new table named <code>students_prepared</code>; the original <code>students</code> table
+            is unchanged. The expression <code>completed == TRUE</code> produces TRUE/FALSE values, and
+            <code>sum()</code> counts the TRUE values when no completion values are missing.
+          </p>
+
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Expected grouped summary</caption>
+              <thead>
+                <tr>
+                  <th scope="col">major</th><th scope="col">students</th><th scope="col">completed</th>
+                  <th scope="col">mean_hours</th><th scope="col">mean_score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Mathematics</th><td>4</td><td>4</td><td>3.825</td><td>80.25</td></tr>
+                <tr><th scope="row">Biology</th><td>4</td><td>3</td><td>3.050</td><td>76.00</td></tr>
+                <tr><th scope="row">Public Health</th><td>4</td><td>1</td><td>2.200</td><td>66.75</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout warning">
+            <p class="callout-title">Descriptive summaries do not establish causation</p>
+            <p>
+              These twelve synthetic observations support only descriptive summaries. Differences in group means do not
+              establish causal effects; inference requires an appropriate design, sampling framework, uncertainty
+              quantification, and assessment of confounding.
+            </p>
+          </div>
+
+          <details>
+            <summary>Exercise: Keep Biology and Public Health students with attendance at least 80%</summary>
+            <div class="code-block" data-r-runnable data-r-context="students-dplyr">
+              <div class="code-label"><span>Solution</span><span>Filter, then select</span></div>
+              <pre tabindex="0" aria-label="Scrollable code example"><code>students |&gt;
+  filter(
+    major %in% c("Biology", "Public Health"),
+    attendance_pct &gt;= 80
+  ) |&gt;
+  select(student_id, major, attendance_pct)</code></pre>
+            </div>
+          </details>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#r-data">&larr; Previous</a>
+            <a href="#r-visualize">Next: Visualize with ggplot2 &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="r-visualize">
+          <span class="chapter-number">Chapter 6</span>
+          <h2>Visualize with ggplot2</h2>
+          <p>
+            A ggplot is built in layers. You provide a dataset, map variables to visual properties inside
+            <code>aes()</code>, choose a geometric layer, then add labels and a theme.
+          </p>
+
+          <div class="code-block">
+            <div class="code-label"><span>Conceptual pattern</span><span>Placeholders &mdash; do not run</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>ggplot(DATA, aes(x = X_VARIABLE, y = Y_VARIABLE)) +
+  geom_...() +
+  labs(...) +
+  theme_minimal()</code></pre>
+          </div>
+          <p>
+            Uppercase tokens and ellipses are placeholders; replace them with data, variables, layers, and labels.
+          </p>
+
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Chart selection by question and variable type</caption>
+              <thead>
+                <tr><th scope="col">Question</th><th scope="col">Variables</th><th scope="col">Starting layer</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>How many observations are in each category?</td><td>One categorical</td><td><code>geom_bar()</code></td></tr>
+                <tr><td>How is one numeric variable distributed?</td><td>One numeric</td><td><code>geom_histogram()</code></td></tr>
+                <tr><td>How do two numeric variables relate?</td><td>Two numeric</td><td><code>geom_point()</code></td></tr>
+                <tr><td>How does a number vary across groups?</td><td>Numeric + categorical</td><td>Points or <code>geom_boxplot()</code></td></tr>
+                <tr><td>How does a value change through ordered time?</td><td>Time + numeric</td><td><code>geom_line()</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Scatterplot: two numeric variables</h3>
+          <div class="code-block" data-r-runnable data-r-context="students-ggplot2">
+            <div class="code-label"><span>R</span><span>One point represents one student</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>score_plot &lt;- ggplot(
+  students,
+  aes(
+    x = study_hours,
+    y = quiz_score,
+    color = major,
+    shape = completed
+  )
+) +
+  geom_point(size = 3, alpha = 0.85) +
+  labs(
+    title = "Study time and quiz score",
+    subtitle = "Synthetic data for code practice",
+    x = "Study time (hours)",
+    y = "Quiz score",
+    color = "Major",
+    shape = "Completed"
+  ) +
+  theme_minimal(base_size = 12)
+
+score_plot</code></pre>
+          </div>
+          <p>
+            Position encodes study hours and score; color and shape encode major and completion status. Association in
+            these synthetic data does not establish causation.
+          </p>
+
+          <div class="callout note">
+            <p class="callout-title">Mapping versus setting</p>
+            <p>
+              <code>aes(color = major)</code> maps color to a variable and creates groups plus a legend.
+              <code>geom_point(color = "#315e7d")</code> sets one fixed color for every point. A quoted color name inside
+              <code>aes()</code> is usually a mistake.
+            </p>
+          </div>
+
+          <h3>Bar chart: count rows in categories</h3>
+          <div class="code-block" data-r-runnable data-r-context="students-ggplot2">
+            <div class="code-label"><span>R</span><span>geom_bar counts rows</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>ggplot(students, aes(x = major)) +
+  geom_bar(fill = "#315e7d", width = 0.7) +
+  labs(
+    title = "Students in each major",
+    x = NULL,
+    y = "Number of students"
+  ) +
+  theme_minimal(base_size = 12)</code></pre>
+          </div>
+          <p>
+            Each bar has height 4 because each major appears in four rows. If you already have a summarized count column,
+            use <code>geom_col()</code> instead.
+          </p>
+
+          <h3>Histogram and boxplot</h3>
+          <div class="code-block" data-r-runnable data-r-context="students-ggplot2">
+            <div class="code-label"><span>R</span><span>Distribution and grouped values</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>ggplot(students, aes(x = quiz_score)) +
+  geom_histogram(binwidth = 5, boundary = 0) +
+  labs(x = "Quiz score", y = "Number of students") +
+  theme_minimal()
+
+ggplot(students, aes(x = major, y = quiz_score)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.8) +
+  labs(x = NULL, y = "Quiz score") +
+  theme_minimal()</code></pre>
+          </div>
+          <p>
+            A histogram groups numeric values into intervals; changing <code>binwidth</code> changes the display. The
+            boxplot summarizes a distribution, while jittered points keep the twelve observations visible. With such a
+            small dataset, focus on the points and avoid strong conclusions.
+          </p>
+
+          <h3>Export a plot</h3>
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Desktop R only &middot; export to a file</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>dir.create("figures", showWarnings = FALSE)
+
+ggsave(
+  filename = "figures/study-time-vs-score.png",
+  plot = score_plot,
+  width = 7,
+  height = 4.5,
+  dpi = 300
+)</code></pre>
+          </div>
+
+          <details>
+            <summary>Exercise: Color points by completion and make one panel per major</summary>
+            <div class="code-block" data-r-runnable data-r-context="students-ggplot2">
+              <div class="code-label"><span>Solution</span><span>Mapping plus facets</span></div>
+              <pre tabindex="0" aria-label="Scrollable code example"><code>ggplot(
+  students,
+  aes(x = attendance_pct, y = quiz_score, color = completed)
+) +
+  geom_point(size = 3) +
+  facet_wrap(~ major) +
+  labs(
+    x = "Attendance (%)",
+    y = "Quiz score",
+    color = "Completed"
+  ) +
+  theme_minimal()</code></pre>
+            </div>
+          </details>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#r-wrangle">&larr; Previous</a>
+            <a href="#r-workflow">Next: Reproducible workflow &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="r-workflow">
+          <span class="chapter-number">Chapter 7</span>
+          <h2>Reproducible analysis workflow</h2>
+          <p>
+            A reproducible analysis regenerates its outputs from the same inputs and script in a fresh R session. Manual
+            or undocumented steps prevent exact regeneration.
+          </p>
+
+          <h3>Recommended project structure</h3>
+          <div class="folder-tree" aria-label="Recommended folder structure">cycle-analysis/
+├── analysis.R
+├── data/
+│   └── r_student_scores.csv
+├── figures/
+└── results/</div>
+
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Desktop R only &middot; full project workflow</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>library(tidyverse)
+
+# 1. Import
+students &lt;- read_csv(
+  "data/r_student_scores.csv",
+  show_col_types = FALSE
+)
+
+# 2. Inspect and validate
+glimpse(students)
+colSums(is.na(students))
+
+stopifnot(nrow(students) &gt; 0)
+stopifnot(anyDuplicated(students$student_id) == 0)
+stopifnot(!anyNA(students$quiz_score))
+stopifnot(all(students$quiz_score &gt;= 0))
+stopifnot(all(students$quiz_score &lt;= 100))
+
+# 3. Prepare
+students_clean &lt;- students |&gt;
+  mutate(
+    major = factor(
+      major,
+      levels = c("Mathematics", "Biology", "Public Health")
+    )
+  )
+
+# 4. Summarize
+major_summary &lt;- students_clean |&gt;
+  group_by(major) |&gt;
+  summarise(
+    students = n(),
+    completed = sum(completed == TRUE),
+    mean_score = mean(quiz_score),
+    .groups = "drop"
+  )
+
+# 5. Visualize
+p &lt;- ggplot(
+  students_clean,
+  aes(x = study_hours, y = quiz_score, color = major)
+) +
+  geom_point(size = 3) +
+  labs(
+    title = "Study time and quiz score",
+    subtitle = "Synthetic tutorial data",
+    x = "Study time (hours)",
+    y = "Quiz score",
+    color = "Major"
+  ) +
+  theme_minimal(base_size = 12)
+
+# 6. Save outputs
+dir.create("results", showWarnings = FALSE)
+dir.create("figures", showWarnings = FALSE)
+
+write_csv(major_summary, "results/major-summary.csv")
+ggsave(
+  "figures/study-time-vs-score.png",
+  plot = p,
+  width = 7,
+  height = 4.5,
+  dpi = 300
+)
+
+# 7. Save package and R versions
+capture.output(
+  sessionInfo(),
+  file = "results/session-info.txt"
+)</code></pre>
+          </div>
+
+          <div class="callout check">
+            <p class="callout-title">Fresh-session test</p>
+            <ol>
+              <li>Save <code>analysis.R</code>.</li>
+              <li>Restart R so the Environment is empty.</li>
+              <li>Run the complete script from top to bottom.</li>
+              <li>Confirm that the table and figure are recreated without manual editing.</li>
+            </ol>
+            <p>
+              If it works only before restarting, your earlier session contained an undocumented object or manual step.
+            </p>
+          </div>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#r-visualize">&larr; Previous</a>
+            <a href="#r-practice">Next: Exercises and reference &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="r-practice">
+          <span class="chapter-number">Chapter 8</span>
+          <h2>Exercises and reference</h2>
+          <p>
+            Complete each exercise before opening the supplied solution, and interpret each result in words.
+          </p>
+
+          <details>
+            <summary>Exercise 1: Find students scoring above 80 and order them from highest to lowest</summary>
+            <div class="code-block" data-r-runnable data-r-context="students-dplyr">
+              <div class="code-label"><span>Solution</span><span>Filter, arrange, select</span></div>
+              <pre tabindex="0" aria-label="Scrollable code example"><code>students |&gt;
+  filter(quiz_score &gt; 80) |&gt;
+  arrange(desc(quiz_score)) |&gt;
+  select(student_id, major, quiz_score)</code></pre>
+            </div>
+            <p>The result has five students: S004, S011, S007, S002, and S009.</p>
+          </details>
+
+          <details>
+            <summary>Exercise 2: Summarize attendance by completion status</summary>
+            <div class="code-block" data-r-runnable data-r-context="students-dplyr">
+              <div class="code-label"><span>Solution</span><span>Grouped summary</span></div>
+              <pre tabindex="0" aria-label="Scrollable code example"><code>students |&gt;
+  group_by(completed) |&gt;
+  summarise(
+    students = n(),
+    mean_attendance = mean(attendance_pct),
+    .groups = "drop"
+  )</code></pre>
+            </div>
+            <p>
+              Expected result: <code>FALSE</code> has 4 students with mean attendance 68.5; <code>TRUE</code> has 8 students
+              with mean attendance 88.125. Always report group counts with means, especially in a small dataset.
+            </p>
+          </details>
+
+          <details>
+            <summary>Exercise 3: Create and save an attendance-versus-score plot</summary>
+            <div class="code-block">
+              <div class="code-label"><span>Solution</span><span>Desktop R only &middot; plot and export</span></div>
+              <pre tabindex="0" aria-label="Scrollable code example"><code>attendance_plot &lt;- ggplot(
+  students,
+  aes(x = attendance_pct, y = quiz_score, shape = completed)
+) +
+  geom_point(size = 3, color = "#315e7d") +
+  labs(
+    title = "Attendance and quiz score",
+    subtitle = "Synthetic tutorial data",
+    x = "Attendance (%)",
+    y = "Quiz score",
+    shape = "Completed"
+  ) +
+  theme_minimal(base_size = 12)
+
+dir.create("figures", showWarnings = FALSE)
+
+ggsave(
+  "figures/attendance-vs-score.png",
+  plot = attendance_plot,
+  width = 7,
+  height = 4.5,
+  dpi = 300
+)</code></pre>
+            </div>
+          </details>
+
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Core syntax and functions</caption>
+              <thead><tr><th scope="col">Goal</th><th scope="col">Function or syntax</th></tr></thead>
+              <tbody>
+                <tr><td>Create an object</td><td><code>name &lt;- value</code></td></tr>
+                <tr><td>Combine values</td><td><code>c(...)</code></td></tr>
+                <tr><td>Inspect a table</td><td><code>glimpse()</code>, <code>head()</code>, <code>summary()</code></td></tr>
+                <tr><td>Find missing values</td><td><code>is.na()</code>, <code>sum(is.na(x))</code></td></tr>
+                <tr><td>Choose columns</td><td><code>select()</code></td></tr>
+                <tr><td>Choose rows</td><td><code>filter()</code></td></tr>
+                <tr><td>Create a column</td><td><code>mutate()</code></td></tr>
+                <tr><td>Repeat a summary by category</td><td><code>group_by()</code> then <code>summarise()</code></td></tr>
+                <tr><td>Start a scatterplot</td><td><code>ggplot(data, aes(x, y)) + geom_point()</code></td></tr>
+                <tr><td>Get help</td><td><code>?mean</code>, <code>help("mean")</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout check">
+            <p class="callout-title">Learning outcomes</p>
+            <ul>
+              <li>the difference between R, RStudio, a script, and the Console;</li>
+              <li>why <code>NA</code>, 0, <code>"0"</code>, and an empty string are not interchangeable;</li>
+              <li>the difference between <code>select()</code> and <code>filter()</code>;</li>
+              <li>the difference between mapping and setting a ggplot property; and</li>
+              <li>why the entire script should run in a fresh session.</li>
+            </ul>
+          </div>
+
+          <h3>References and further reading</h3>
+          <ul class="source-list">
+            <li><a href="https://cran.r-project.org/doc/manuals/r-release/R-intro.html" target="_blank" rel="noopener noreferrer">An Introduction to R</a> &mdash; the official R manual.</li>
+            <li><a href="https://dplyr.tidyverse.org/articles/dplyr.html" target="_blank" rel="noopener noreferrer">Introduction to dplyr</a> &mdash; official documentation for the data verbs used here.</li>
+            <li><a href="https://ggplot2.tidyverse.org/articles/ggplot2.html" target="_blank" rel="noopener noreferrer">Introduction to ggplot2</a> &mdash; official explanation of the grammar of graphics.</li>
+            <li><a href="https://docs.posit.co/ide/user/ide/guide/code/projects.html" target="_blank" rel="noopener noreferrer">RStudio Projects</a> &mdash; Posit’s guide to project-based work.</li>
+            <li><a href="https://docs.r-wasm.org/webr/v0.6.0/" target="_blank" rel="noopener noreferrer">webR</a> &mdash; the browser-based R runtime used by the interactive examples.</li>
+          </ul>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#r-workflow">&larr; Previous</a>
+            <a href="microbiome/">Next tutorial: Microbiome Data Basics &rarr;</a>
+          </nav>
+        </section>
+      </main>
+    </div>
+
+    <footer class="page-footer">
+      <div class="footer-inner">
+        <p>Cycle 2026 Tutorials &middot; <a href="../">Yiqian Zhang</a> &middot; <a href="https://math.osu.edu/cycle" target="_blank" rel="noopener noreferrer">OSU Cycle</a></p>
+      </div>
+    </footer>
+    <script type="module" src="assets/r-runner.js?v=20260908-1"></script>
+  </body>
+</html>

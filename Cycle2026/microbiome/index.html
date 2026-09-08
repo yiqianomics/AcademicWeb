@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="An introductory microbiome data tutorial covering linked count, metadata, and taxonomy tables; sequencing depth; observed zeros; compositionality; diversity; and ordination."
+    />
+    <title>Microbiome Data Basics | Cycle 2026 Tutorials</title>
+    <script>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem("yiqian-theme-override");
+          if (savedTheme === "light" || savedTheme === "dark") {
+            document.documentElement.dataset.theme = savedTheme;
+            document.documentElement.style.colorScheme = savedTheme;
+          }
+        } catch (_) {
+          /* Follow the system theme when storage is unavailable. */
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="../assets/tutorial.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#lesson">Skip to lesson content</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="home-link" href="../../"><span aria-hidden="true">&larr;</span> Yiqian Zhang</a>
+        <span class="course-label">Cycle 2026 Tutorials</span>
+      </div>
+    </header>
+
+    <section class="page-intro" aria-labelledby="page-title">
+      <h1 id="page-title">Microbiome Data Basics</h1>
+      <p class="lead">
+        This tutorial introduces the structure and interpretation of marker-gene amplicon data using linked count,
+        metadata, and taxonomy tables. It covers sequencing depth, observed zeros, compositionality, filtering, alpha
+        diversity, dissimilarity, and ordination. Other assays may require different features and preprocessing.
+      </p>
+    </section>
+
+    <div class="book-switcher-wrap">
+      <nav class="book-switcher" aria-label="Tutorials">
+        <span>Tutorials</span>
+        <a href="../">R Foundations</a>
+        <a href="./" aria-current="page">Microbiome Data Basics</a>
+      </nav>
+    </div>
+
+    <div class="book-layout">
+      <aside class="toc">
+        <p class="toc-title">On this page</p>
+        <nav aria-label="Microbiome tutorial chapters">
+          <ol>
+            <li><a href="#micro-observation">What one count means</a></li>
+            <li><a href="#micro-objects">The linked data objects</a></li>
+            <li><a href="#micro-depth">IDs and sequencing depth</a></li>
+            <li><a href="#micro-zeros">Why zeros are difficult</a></li>
+            <li><a href="#micro-composition">Relative abundance</a></li>
+            <li><a href="#micro-filter">Prevalence and filtering</a></li>
+            <li><a href="#micro-alpha">Alpha diversity</a></li>
+            <li><a href="#micro-beta">Beta diversity and ordination</a></li>
+            <li><a href="#micro-workflow">Analysis workflow</a></li>
+            <li><a href="#micro-practice">Exercises and reference</a></li>
+          </ol>
+        </nav>
+        <div class="toc-downloads">
+          <p class="toc-title">Practice data</p>
+          <a href="../data/microbiome_counts.csv" download>Download count table</a>
+          <a href="../data/microbiome_metadata.csv" download>Download sample metadata</a>
+          <a href="../data/microbiome_taxonomy.csv" download>Download taxonomy table</a>
+        </div>
+      </aside>
+
+      <main class="book" id="lesson" tabindex="-1">
+        <section class="chapter" id="micro-observation">
+          <span class="chapter-number">Chapter 1</span>
+          <h2>Interpreting observed counts</h2>
+          <p>
+            Each entry in a marker-gene count table is the number of retained reads assigned to one feature in one sample.
+            The table reflects finite sampling and processing; it is not a census of microbial cells in the specimen.
+          </p>
+
+          <h3>Marker-gene terminology</h3>
+          <dl class="definition-list">
+            <dt>Marker gene</dt><dd>A short DNA region used as a signpost for describing which microbes may be present.</dd>
+            <dt>Amplification</dt><dd>Making many copies of the chosen marker so the sequencing instrument can measure it.</dd>
+            <dt>Amplicon</dt><dd>The copied DNA fragment produced during amplification; this tutorial analyzes such fragments.</dd>
+            <dt>Taxonomy</dt><dd>Nested names used to classify organisms, from broad groups to narrower groups.</dd>
+            <dt>Gene-copy number</dt><dd>The number of copies of the marker gene in a genome; this can differ among microbes.</dd>
+            <dt>Phylogenetic tree</dt><dd>A branching diagram representing inferred evolutionary relatedness among features.</dd>
+          </dl>
+
+          <div class="plain-diagram" role="list" aria-label="From a specimen to a count table">
+            <div class="diagram-step" role="listitem">
+              <strong>Physical sample</strong>
+              <p>A collected specimen contains microbial material.</p>
+            </div>
+            <div class="diagram-step" role="listitem">
+              <strong>Measurement pipeline</strong>
+              <p>Extraction, amplification, sequencing, and processing select what is observed.</p>
+            </div>
+            <div class="diagram-step" role="listitem">
+              <strong>Count table</strong>
+              <p>Reads are assigned to features for each sample.</p>
+            </div>
+          </div>
+
+          <dl class="definition-list">
+            <dt>Sample</dt><dd>One collected specimen represented by one row in our teaching table.</dd>
+            <dt>Read</dt><dd>One sequencing observation retained after processing.</dd>
+            <dt>Feature</dt><dd>A unit produced by the pipeline, such as an ASV, OTU, taxon, gene, or pathway.</dd>
+            <dt>Count</dt><dd>The number of retained reads assigned to one feature in one sample.</dd>
+            <dt>ASV</dt><dd>An amplicon sequence variant: a sequence-level feature, not automatically a species.</dd>
+          </dl>
+
+          <div class="callout warning">
+            <p class="callout-title">A read count is not a cell count</p>
+            <p>
+              If ASV1 has count 40 in sample S1, we observed 40 reads assigned to ASV1. We cannot conclude that the
+              specimen contained exactly 40 cells. Sampling, extraction, gene-copy number, amplification, sequencing, and
+              processing all stand between cells and the final table.
+            </p>
+          </div>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <span></span>
+            <a href="#micro-objects">Next: The linked data objects &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="micro-objects">
+          <span class="chapter-number">Chapter 2</span>
+          <h2>The linked data objects</h2>
+          <p>
+            Many marker-gene microbiome projects use three linked tables. Sample IDs connect counts to sample metadata;
+            feature IDs connect counts to taxonomy. Some projects also include representative sequences and a
+            phylogenetic tree.
+          </p>
+
+          <figure class="diagram">
+            <svg viewBox="0 0 820 350" role="img" aria-labelledby="linked-title linked-desc">
+              <title id="linked-title">Three linked microbiome data tables</title>
+              <desc id="linked-desc">Sample metadata connects to count-table rows through sample identifiers, while taxonomy connects to count-table columns through feature identifiers.</desc>
+              <rect x="28" y="50" width="210" height="98" rx="6" fill="var(--note-bg)" stroke="var(--note-line)" stroke-width="2"/>
+              <rect x="306" y="28" width="250" height="158" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+              <rect x="626" y="50" width="166" height="98" rx="6" fill="var(--check-bg)" stroke="var(--check-line)" stroke-width="2"/>
+              <rect x="306" y="254" width="250" height="68" rx="6" fill="var(--paper)" stroke="var(--line-strong)" stroke-width="2" stroke-dasharray="7 5"/>
+              <text x="133" y="82" fill="currentColor" font-size="19" text-anchor="middle" font-weight="700">Sample metadata</text>
+              <text x="133" y="112" fill="currentColor" font-size="15" text-anchor="middle">group, batch, body site</text>
+              <text x="431" y="66" fill="currentColor" font-size="19" text-anchor="middle" font-weight="700">Count table</text>
+              <text x="431" y="99" fill="currentColor" font-size="15" text-anchor="middle">rows = samples</text>
+              <text x="431" y="126" fill="currentColor" font-size="15" text-anchor="middle">columns = features</text>
+              <text x="431" y="153" fill="currentColor" font-size="15" text-anchor="middle">cells = observed reads</text>
+              <text x="709" y="82" fill="currentColor" font-size="19" text-anchor="middle" font-weight="700">Taxonomy</text>
+              <text x="709" y="112" fill="currentColor" font-size="15" text-anchor="middle">phylum, genus, ...</text>
+              <text x="431" y="282" fill="currentColor" font-size="17" text-anchor="middle" font-weight="700">Sequences / tree</text>
+              <text x="431" y="307" fill="currentColor" font-size="14" text-anchor="middle">optional; linked by feature ID</text>
+              <path d="M238 99H298" stroke="currentColor" stroke-width="2"/>
+              <path d="M556 99H618" stroke="currentColor" stroke-width="2"/>
+              <path d="M431 187V246" stroke="currentColor" stroke-width="2"/>
+              <path d="m290 91 8 8-8 8M610 91l8 8-8 8M423 238l8 8 8-8" fill="none" stroke="currentColor" stroke-width="2"/>
+              <text x="268" y="86" fill="currentColor" font-size="13" text-anchor="middle">sample_id</text>
+              <text x="587" y="86" fill="currentColor" font-size="13" text-anchor="middle">feature_id</text>
+            </svg>
+            <figcaption>
+              Never join these tables by their current row order alone. Match the explicit IDs and then verify the result.
+            </figcaption>
+          </figure>
+
+          <h3>1. Sample-by-feature count table</h3>
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Synthetic count table used throughout this tutorial</caption>
+              <thead>
+                <tr>
+                  <th scope="col">sample_id</th><th scope="col">ASV1</th><th scope="col">ASV2</th>
+                  <th scope="col">ASV3</th><th scope="col">ASV4</th><th scope="col">ASV5</th><th scope="col">ASV6</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">S1</th><td>40</td><td>10</td><td>0</td><td>0</td><td>5</td><td>0</td></tr>
+                <tr><th scope="row">S2</th><td>80</td><td>20</td><td>0</td><td>0</td><td>10</td><td>0</td></tr>
+                <tr><th scope="row">S3</th><td>5</td><td>25</td><td>15</td><td>0</td><td>0</td><td>5</td></tr>
+                <tr><th scope="row">S4</th><td>10</td><td>50</td><td>30</td><td>0</td><td>0</td><td>10</td></tr>
+                <tr><th scope="row">B1</th><td>0</td><td>0</td><td>0</td><td>6</td><td>0</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Each cell is an observed count. The constructed table makes S2 exactly twice the counts of S1 and S4 exactly
+            twice the counts of S3. B1 is a low-count negative control.
+          </p>
+
+          <h3>2. Sample metadata</h3>
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Variables describing each sample</caption>
+              <thead><tr><th scope="col">sample_id</th><th scope="col">group</th><th scope="col">body_site</th><th scope="col">batch</th><th scope="col">sample_type</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">S1</th><td>Control</td><td>Gut</td><td>1</td><td>Biological</td></tr>
+                <tr><th scope="row">S2</th><td>Control</td><td>Gut</td><td>1</td><td>Biological</td></tr>
+                <tr><th scope="row">S3</th><td>Treatment</td><td>Gut</td><td>1</td><td>Biological</td></tr>
+                <tr><th scope="row">S4</th><td>Treatment</td><td>Gut</td><td>2</td><td>Biological</td></tr>
+                <tr><th scope="row">B1</th><td>Blank</td><td>Not applicable</td><td>1</td><td>Negative control</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Metadata describe samples: treatment, time, subject, site, batch, and similar variables. Batch is not a
+            nuisance you may ignore; it can be confused with the scientific group if the study is poorly balanced.
+          </p>
+
+          <h3>3. Taxonomy table</h3>
+          <p>
+            A taxonomy table attaches hierarchical labels to feature IDs. Classification can stop at different levels or
+            be uncertain. A phylum is a broader group than a genus. Keep the original ASV IDs; a missing genus label does
+            not mean the feature count is zero.
+          </p>
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Illustrative annotations for the six synthetic features</caption>
+              <thead><tr><th scope="col">feature_id</th><th scope="col">phylum</th><th scope="col">genus</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">ASV1</th><td>Bacteroidota</td><td>Bacteroides</td></tr>
+                <tr><th scope="row">ASV2</th><td>Bacillota</td><td>Faecalibacterium</td></tr>
+                <tr><th scope="row">ASV3</th><td>Bacillota</td><td>Blautia</td></tr>
+                <tr><th scope="row">ASV4</th><td>Pseudomonadota</td><td>Pseudomonas</td></tr>
+                <tr><th scope="row">ASV5</th><td>Verrucomicrobiota</td><td>Akkermansia</td></tr>
+                <tr><th scope="row">ASV6</th><td>Actinomycetota</td><td>Bifidobacterium</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Taxonomic labels are illustrative; no biological or functional inference is intended.
+          </p>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#micro-observation">&larr; Previous</a>
+            <a href="#micro-depth">Next: IDs and sequencing depth &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="micro-depth">
+          <span class="chapter-number">Chapter 3</span>
+          <h2>Validate IDs and calculate sequencing depth</h2>
+          <p>
+            Validate table structure and identifier alignment before analysis.
+          </p>
+
+          <h3>Import the three teaching tables</h3>
+          <p>
+            Download the files from the sidebar, preserve their names, and place them together in your project’s
+            <code>data</code> folder.
+          </p>
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Import and validate</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code># Run once if tidyverse is not already installed:
+install.packages("tidyverse")
+
+# Run at the start of each new session:
+library(tidyverse)
+
+counts &lt;- read_csv(
+  "data/microbiome_counts.csv",
+  show_col_types = FALSE
+)
+metadata &lt;- read_csv(
+  "data/microbiome_metadata.csv",
+  show_col_types = FALSE
+)
+taxonomy &lt;- read_csv(
+  "data/microbiome_taxonomy.csv",
+  show_col_types = FALSE
+)
+
+count_matrix &lt;- as.matrix(counts[, -1])
+rownames(count_matrix) &lt;- counts$sample_id
+
+stopifnot(anyDuplicated(counts$sample_id) == 0)
+stopifnot(anyDuplicated(metadata$sample_id) == 0)
+stopifnot(anyDuplicated(taxonomy$feature_id) == 0)
+stopifnot(setequal(counts$sample_id, metadata$sample_id))
+stopifnot(setequal(colnames(count_matrix), taxonomy$feature_id))
+stopifnot(!anyNA(count_matrix))
+stopifnot(all(count_matrix &gt;= 0))
+stopifnot(all(count_matrix == floor(count_matrix)))</code></pre>
+          </div>
+          <p>
+            <code>stopifnot()</code> stops execution when an assumption is false. <code>setequal()</code> checks that the
+            same IDs appear regardless of order. Before joining values, reorder explicitly and confirm
+            <code>identical()</code> order.
+          </p>
+          <p>
+            In <code>counts[, -1]</code>, the empty space means “all rows” and <code>-1</code> removes the first column,
+            which contains IDs rather than counts. <code>as.matrix()</code> then creates a numeric matrix;
+            <code>rownames()</code> attaches the sample IDs to its rows.
+          </p>
+
+          <h3>Library size is a row sum</h3>
+          <div class="formula">Library size of sample <em>i</em> = sum of its feature counts</div>
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Observed sequencing depth</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>library_size &lt;- rowSums(count_matrix)
+library_size</code></pre>
+          </div>
+          <div class="output"> S1  S2  S3  S4  B1
+ 55 110  50 100   6</div>
+          <p>
+            B1 is a negative control with six retained reads; exclude it from biological summaries and evaluate it during
+            contamination assessment.
+          </p>
+
+          <figure class="diagram">
+            <svg viewBox="0 0 820 310" role="img" aria-labelledby="depth-title depth-desc">
+              <title id="depth-title">Different library sizes can represent the same observed proportions</title>
+              <desc id="depth-desc">Sample S1 has 55 reads and S2 has 110 reads, but both bars have the same proportions across ASV1, ASV2, and ASV5.</desc>
+              <text x="25" y="66" fill="currentColor" font-size="18" font-weight="700">S1</text>
+              <text x="25" y="164" fill="currentColor" font-size="18" font-weight="700">S2</text>
+              <rect x="80" y="35" width="472" height="48" fill="var(--plot-blue)"/>
+              <rect x="552" y="35" width="118" height="48" fill="var(--plot-orange)"/>
+              <rect x="670" y="35" width="59" height="48" fill="var(--plot-green)"/>
+              <rect x="80" y="133" width="472" height="48" fill="var(--plot-blue)"/>
+              <rect x="552" y="133" width="118" height="48" fill="var(--plot-orange)"/>
+              <rect x="670" y="133" width="59" height="48" fill="var(--plot-green)"/>
+              <text x="747" y="66" fill="currentColor" font-size="16">55 reads</text>
+              <text x="747" y="164" fill="currentColor" font-size="16">110 reads</text>
+              <rect x="80" y="238" width="18" height="18" fill="var(--plot-blue)"/>
+              <text x="107" y="252" fill="currentColor" font-size="15">ASV1 72.7%</text>
+              <rect x="280" y="238" width="18" height="18" fill="var(--plot-orange)"/>
+              <text x="307" y="252" fill="currentColor" font-size="15">ASV2 18.2%</text>
+              <rect x="480" y="238" width="18" height="18" fill="var(--plot-green)"/>
+              <text x="507" y="252" fill="currentColor" font-size="15">ASV5 9.1%</text>
+            </svg>
+            <figcaption>
+              S2 has twice as many observed reads as S1, but the two observed compositions are identical. More reads do
+              not automatically mean more microbial cells in the original specimen.
+            </figcaption>
+          </figure>
+
+          <div class="callout warning">
+            <p class="callout-title">Terminology</p>
+            <p>
+              Avoid “S2 has twice the microbial abundance.” Say “S2 has twice the library size” or “twice the observed
+              sequencing depth.” Absolute microbial load requires additional measurement or design information.
+            </p>
+          </div>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#micro-objects">&larr; Previous</a>
+            <a href="#micro-zeros">Next: Why zeros are difficult &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="micro-zeros">
+          <span class="chapter-number">Chapter 4</span>
+          <h2>Why an observed zero is difficult</h2>
+          <p>
+            A zero in the count table says only that no read was observed for that sample-feature combination. Different
+            underlying processes can produce the same visible value.
+          </p>
+
+          <figure class="diagram">
+            <svg viewBox="0 0 820 360" role="img" aria-labelledby="zero-title zero-desc">
+              <title id="zero-title">Structural and sampling zeros can look identical</title>
+              <desc id="zero-desc">A truly absent feature and a present but undetected feature both lead to a zero in the observed count table, while a captured feature leads to a positive count.</desc>
+              <rect x="35" y="35" width="230" height="72" rx="5" fill="var(--paper)" stroke="var(--line-strong)" stroke-width="2"/>
+              <text x="150" y="65" text-anchor="middle" fill="currentColor" font-size="17" font-weight="700">Underlying feature state</text>
+              <text x="150" y="90" text-anchor="middle" fill="currentColor" font-size="14">not directly observed</text>
+              <rect x="330" y="25" width="215" height="70" rx="5" fill="var(--warning-bg)" stroke="var(--warning-line)" stroke-width="2"/>
+              <text x="438" y="55" text-anchor="middle" fill="currentColor" font-size="17" font-weight="700">Truly absent</text>
+              <text x="438" y="80" text-anchor="middle" fill="currentColor" font-size="14">possible structural zero</text>
+              <rect x="330" y="137" width="215" height="82" rx="5" fill="var(--note-bg)" stroke="var(--note-line)" stroke-width="2"/>
+              <text x="438" y="167" text-anchor="middle" fill="currentColor" font-size="17" font-weight="700">Present at low level</text>
+              <text x="438" y="192" text-anchor="middle" fill="currentColor" font-size="14">not captured in finite reads</text>
+              <rect x="330" y="268" width="215" height="62" rx="5" fill="var(--check-bg)" stroke="var(--check-line)" stroke-width="2"/>
+              <text x="438" y="305" text-anchor="middle" fill="currentColor" font-size="17" font-weight="700">Present and captured</text>
+              <rect x="630" y="58" width="150" height="88" rx="5" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+              <text x="705" y="91" text-anchor="middle" fill="currentColor" font-size="18" font-weight="700">Observed</text>
+              <text x="705" y="124" text-anchor="middle" fill="currentColor" font-size="26">0</text>
+              <rect x="630" y="248" width="150" height="88" rx="5" fill="var(--paper)" stroke="var(--check-line)" stroke-width="2"/>
+              <text x="705" y="281" text-anchor="middle" fill="currentColor" font-size="18" font-weight="700">Observed</text>
+              <text x="705" y="314" text-anchor="middle" fill="currentColor" font-size="23">&gt; 0</text>
+              <path d="M265 71H322M545 60C585 60 585 102 622 102M545 178C590 178 585 112 622 105M545 299H622" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="m314 63 8 8-8 8M614 94l8 8-8 8M614 291l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <figcaption>
+              The mechanism cannot be inferred from a single observed zero. Repeated sampling, controls, study design,
+              and an appropriate model may provide additional evidence.
+            </figcaption>
+          </figure>
+
+          <dl class="definition-list">
+            <dt>Structural zero</dt><dd>The feature is genuinely absent from the target community under the scientific definition.</dd>
+            <dt>Sampling zero</dt><dd>The feature is present at a low level but was not captured by finite sampling or measurement.</dd>
+            <dt><code>NA</code></dt><dd>The value is unknown or unavailable. It is missing data, not an observed count of zero.</dd>
+          </dl>
+
+          <h3>Zeros in the synthetic dataset</h3>
+          <ul>
+            <li>ASV3 is zero in S1 and S2 but observed in S3 and S4. The table alone does not reveal why.</li>
+            <li>ASV4 occurs only in negative control B1. That is a contamination warning to investigate, not automatic proof.</li>
+            <li>ASV6 is observed in treatment samples only. This small descriptive dataset cannot establish a treatment effect.</li>
+          </ul>
+
+          <div class="callout warning">
+            <p class="callout-title">Pseudocounts do not identify zero mechanisms</p>
+            <p>
+              Some later methods compare logarithms of feature ratios, but the logarithm of zero is undefined. Adding a
+              small number can make that calculation computable. It does not reveal why the original observation was zero
+              or turn non-detection into biological presence. Preserve the original counts and document the zero-handling rule.
+            </p>
+          </div>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#micro-depth">&larr; Previous</a>
+            <a href="#micro-composition">Next: Relative abundance &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="micro-composition">
+          <span class="chapter-number">Chapter 5</span>
+          <h2>Relative abundance and compositionality</h2>
+          <p>
+            Relative abundance divides each feature count by its sample’s library size. It answers “What share of the
+            observed reads belongs to this feature?” Every sample is rescaled to a total of 1, or 100%.
+          </p>
+
+          <div class="formula">
+            Relative abundance of feature <em>j</em> in sample <em>i</em> =
+            count<sub>ij</sub> / library size<sub>i</sub>
+          </div>
+
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Counts to proportions</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>relative_matrix &lt;- sweep(
+  count_matrix,
+  MARGIN = 1,
+  STATS = rowSums(count_matrix),
+  FUN = "/"
+)
+
+round(relative_matrix, 3)
+rowSums(relative_matrix)</code></pre>
+          </div>
+          <p>
+            <code>sweep()</code> divides every row by its own row sum. Confirm that each nonempty row now sums to 1.
+            Handle zero-library samples explicitly before division; otherwise they produce undefined values.
+          </p>
+
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Selected relative-abundance profiles</caption>
+              <thead>
+                <tr>
+                  <th scope="col">sample</th><th scope="col">ASV1</th><th scope="col">ASV2</th>
+                  <th scope="col">ASV3</th><th scope="col">ASV5</th><th scope="col">ASV6</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">S1</th><td>72.7%</td><td>18.2%</td><td>0%</td><td>9.1%</td><td>0%</td></tr>
+                <tr><th scope="row">S2</th><td>72.7%</td><td>18.2%</td><td>0%</td><td>9.1%</td><td>0%</td></tr>
+                <tr><th scope="row">S3</th><td>10%</td><td>50%</td><td>30%</td><td>0%</td><td>10%</td></tr>
+                <tr><th scope="row">S4</th><td>10%</td><td>50%</td><td>30%</td><td>0%</td><td>10%</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>The compositional constraint</h3>
+          <p>
+            Because proportions sum to one, increasing one component’s share necessarily reduces at least one other share.
+            Relative abundance therefore describes ratios among observed components, not absolute microbial load.
+          </p>
+          <ul>
+            <li>Relative abundance is useful for descriptive plots.</li>
+            <li>It does not recover absolute microbial load.</li>
+            <li>“Twice the proportion” does not necessarily mean “twice as many cells.”</li>
+            <li>Counts, proportions, and log-ratios are different representations and can answer different questions.</li>
+            <li>Always retain the original count table.</li>
+          </ul>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#micro-zeros">&larr; Previous</a>
+            <a href="#micro-filter">Next: Prevalence and filtering &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="micro-filter">
+          <span class="chapter-number">Chapter 6</span>
+          <h2>Prevalence, abundance, and filtering</h2>
+          <p>
+            <strong>Prevalence</strong> is the proportion of samples in which a feature was detected. Abundance describes
+            how much was observed. A feature can be widespread but low in abundance, or abundant in only a few samples.
+          </p>
+
+          <div class="formula">
+            Prevalence of feature <em>j</em> =
+            number of samples with count<sub>ij</sub> &gt; 0 / number of samples
+          </div>
+
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Use biological samples for this summary</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>counts_long &lt;- counts |&gt;
+  pivot_longer(
+    -sample_id,
+    names_to = "feature_id",
+    values_to = "count"
+  )
+
+biological_ids &lt;- metadata |&gt;
+  filter(sample_type == "Biological") |&gt;
+  pull(sample_id)
+
+feature_summary &lt;- counts_long |&gt;
+  filter(sample_id %in% biological_ids) |&gt;
+  group_by(feature_id) |&gt;
+  summarise(
+    detected = sum(count &gt; 0),
+    prevalence = mean(count &gt; 0),
+    total_reads = sum(count),
+    .groups = "drop"
+  )
+
+feature_summary</code></pre>
+          </div>
+
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Detection across four biological samples</caption>
+              <thead><tr><th scope="col">feature</th><th scope="col">detected</th><th scope="col">prevalence</th><th scope="col">total reads</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">ASV1</th><td>4 of 4</td><td>100%</td><td>135</td></tr>
+                <tr><th scope="row">ASV2</th><td>4 of 4</td><td>100%</td><td>105</td></tr>
+                <tr><th scope="row">ASV3</th><td>2 of 4</td><td>50%</td><td>45</td></tr>
+                <tr><th scope="row">ASV4</th><td>0 of 4</td><td>0%</td><td>0</td></tr>
+                <tr><th scope="row">ASV5</th><td>2 of 4</td><td>50%</td><td>15</td></tr>
+                <tr><th scope="row">ASV6</th><td>2 of 4</td><td>50%</td><td>15</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout warning">
+            <p class="callout-title">Filtering changes the scientific object</p>
+            <ul>
+              <li>Rare features are not automatically errors or irrelevant.</li>
+              <li>Filtering changes richness, distances, and possibly conclusions.</li>
+              <li>Define filtering rules independently of desired visual separation.</li>
+              <li>Document the threshold and rationale; when possible, check sensitivity to another reasonable rule.</li>
+              <li>Sample filtering for low depth and feature filtering for low prevalence are different decisions.</li>
+              <li>Use negative controls and suitable methods to assess contamination; an abundance cutoff is not enough.</li>
+            </ul>
+          </div>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#micro-composition">&larr; Previous</a>
+            <a href="#micro-alpha">Next: Alpha diversity &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="micro-alpha">
+          <span class="chapter-number">Chapter 7</span>
+          <h2>Alpha diversity: within one sample</h2>
+          <p>
+            Alpha diversity summarizes within-sample feature variety. No single index represents all aspects of diversity;
+            different indices emphasize different properties of the observed community.
+          </p>
+
+          <h3>Observed richness</h3>
+          <div class="formula">Observed richness = number of features with count &gt; 0</div>
+          <p>
+            Richness records which features were detected, but ignores how reads are distributed. It is sensitive to
+            sequencing effort, detection, and filtering.
+          </p>
+
+          <h3>Shannon diversity</h3>
+          <div class="formula">
+            H = &minus;&Sigma; p<sub>j</sub> log(p<sub>j</sub>), summed over positive proportions
+          </div>
+          <p>
+            Shannon diversity reflects both richness and evenness. With the same richness, a sample whose reads are spread
+            more evenly across features usually has a larger value than one dominated by a single feature. R’s
+            <code>log()</code> uses the natural logarithm, so that is the convention used below.
+          </p>
+
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Observed diversity summaries</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>bio_matrix &lt;- count_matrix[
+  rownames(count_matrix) %in% biological_ids,
+  ,
+  drop = FALSE
+]
+
+bio_relative &lt;- sweep(
+  bio_matrix,
+  1,
+  rowSums(bio_matrix),
+  "/"
+)
+
+alpha_summary &lt;- tibble(
+  sample_id = rownames(bio_matrix),
+  library_size = rowSums(bio_matrix),
+  observed_richness = rowSums(bio_matrix &gt; 0),
+  shannon = apply(
+    bio_relative,
+    1,
+    function(p) -sum(p[p &gt; 0] * log(p[p &gt; 0]))
+  )
+)
+
+alpha_summary</code></pre>
+          </div>
+
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Alpha-diversity summaries for the synthetic biological samples</caption>
+              <thead><tr><th scope="col">sample</th><th scope="col">library size</th><th scope="col">richness</th><th scope="col">Shannon</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">S1</th><td>55</td><td>3</td><td>0.760</td></tr>
+                <tr><th scope="row">S2</th><td>110</td><td>3</td><td>0.760</td></tr>
+                <tr><th scope="row">S3</th><td>50</td><td>4</td><td>1.168</td></tr>
+                <tr><th scope="row">S4</th><td>100</td><td>4</td><td>1.168</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout warning">
+            <p class="callout-title">Interpretation boundary</p>
+            <p>
+              These values summarize the observed table. A higher diversity value is not universally “better,” does not
+              identify which features differ, and does not prove a biological mechanism. Always state the index,
+              preprocessing, sample type, and comparison.
+            </p>
+          </div>
+          <div class="callout note">
+            <p class="callout-title">Unequal library sizes</p>
+            <p>
+              Observed richness is especially sensitive to library size. Real analyses may use rarefaction,
+              coverage-based comparisons, or statistical models for different purposes. There is no universal correction:
+              choose a method that matches the question and report it.
+            </p>
+          </div>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#micro-filter">&larr; Previous</a>
+            <a href="#micro-beta">Next: Beta diversity and ordination &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="micro-beta">
+          <span class="chapter-number">Chapter 8</span>
+          <h2>Beta diversity, dissimilarity, and ordination</h2>
+          <p>
+            Beta-diversity analyses quantify differences among sample profiles. The primary object is a distance or
+            dissimilarity matrix containing one value for each sample pair.
+          </p>
+          <p>
+            Terminology varies across fields, so do not report only “beta diversity.” Name the representation, exact
+            distance or dissimilarity, feature set, and downstream method.
+          </p>
+
+          <h3>Bray&ndash;Curtis dissimilarity</h3>
+          <div class="formula">
+            BC(x, y) = &Sigma; |x<sub>j</sub> &minus; y<sub>j</sub>| /
+            &Sigma; (x<sub>j</sub> + y<sub>j</sub>)
+          </div>
+          <ul>
+            <li>0 means the two input profiles are identical.</li>
+            <li>Values nearer 1 indicate greater dissimilarity under this definition.</li>
+            <li>The answer depends on the values you put into the formula and which features you retained.</li>
+          </ul>
+
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Compare two vectors</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>bray_curtis &lt;- function(x, y) {
+  sum(abs(x - y)) / sum(x + y)
+}
+
+bray_curtis(
+  count_matrix["S1", ],
+  count_matrix["S2", ]
+)
+
+bray_curtis(
+  relative_matrix["S1", ],
+  relative_matrix["S2", ]
+)</code></pre>
+          </div>
+          <div class="output">[1] 0.3333333
+[1] 0</div>
+          <p>
+            Raw counts make S1 and S2 look different because S2 has twice the total count. Their relative profiles are
+            identical, so relative-abundance Bray&ndash;Curtis is 0. Preprocessing is part of the comparison’s definition,
+            not an invisible preliminary step.
+          </p>
+
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Bray&ndash;Curtis dissimilarities computed from the relative-abundance table</caption>
+              <thead><tr><th scope="col">sample</th><th scope="col">S1</th><th scope="col">S2</th><th scope="col">S3</th><th scope="col">S4</th><th scope="col">B1</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">S1</th><td>0</td><td>0</td><td>0.718</td><td>0.718</td><td>1</td></tr>
+                <tr><th scope="row">S2</th><td>0</td><td>0</td><td>0.718</td><td>0.718</td><td>1</td></tr>
+                <tr><th scope="row">S3</th><td>0.718</td><td>0.718</td><td>0</td><td>0</td><td>1</td></tr>
+                <tr><th scope="row">S4</th><td>0.718</td><td>0.718</td><td>0</td><td>0</td><td>1</td></tr>
+                <tr><th scope="row">B1</th><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            In this matrix, S1 versus S3 is 0.718, whereas S1 versus S2 is 0. PCoA begins with a complete dissimilarity
+            matrix such as this.
+          </p>
+
+          <div class="table-wrap" role="region" aria-label="Scrollable table" tabindex="0">
+            <table>
+              <caption>Different distances emphasize different information</caption>
+              <thead><tr><th scope="col">Measure</th><th scope="col">Main input idea</th><th scope="col">Question emphasized</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Jaccard</th><td>Presence / absence</td><td>Were the same features detected?</td></tr>
+                <tr><th scope="row">Bray&ndash;Curtis</th><td>Nonnegative abundances</td><td>How different are observed profiles?</td></tr>
+                <tr><th scope="row">Aitchison</th><td>Log-ratio structure; zeros need an explicit strategy</td><td>How do relative relationships among parts differ?</td></tr>
+                <tr><th scope="row">UniFrac</th><td>Feature profiles + tree</td><td>How different are samples considering phylogeny?</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Principal coordinates analysis</h3>
+          <p>
+            Principal coordinates analysis (PCoA) places samples on a few axes so the displayed distances approximate the
+            original pairwise distances. A two-dimensional display usually loses information, so report how much variation
+            the displayed axes represent.
+          </p>
+
+          <figure class="diagram">
+            <svg viewBox="0 0 820 430" role="img" aria-labelledby="ordination-title ordination-desc">
+              <title id="ordination-title">Schematic principal coordinates plot</title>
+              <desc id="ordination-desc">Control samples appear near each other on the left, treatment samples near each other on the right, and the negative control is separated above them. This is a schematic, not a computed result.</desc>
+              <path d="M95 35V350H770M95 350l-10-14M95 350l14-10M770 350l-14-10M770 350l-10 14" fill="none" stroke="currentColor" stroke-width="2"/>
+              <text x="420" y="397" fill="currentColor" font-size="17" text-anchor="middle">PCoA axis 1</text>
+              <text x="28" y="190" fill="currentColor" font-size="17" text-anchor="middle" transform="rotate(-90 28 190)">PCoA axis 2</text>
+              <circle cx="220" cy="250" r="11" fill="var(--plot-blue)"/>
+              <circle cx="268" cy="270" r="11" fill="var(--plot-blue)"/>
+              <text x="211" y="229" fill="currentColor" font-size="15">S1</text>
+              <text x="273" y="252" fill="currentColor" font-size="15">S2</text>
+              <rect x="566" y="222" width="21" height="21" fill="var(--plot-orange)"/>
+              <rect x="625" y="255" width="21" height="21" fill="var(--plot-orange)"/>
+              <text x="560" y="211" fill="currentColor" font-size="15">S3</text>
+              <text x="651" y="271" fill="currentColor" font-size="15">S4</text>
+              <path d="m422 82 13 24h-26Z" fill="var(--plot-red)"/>
+              <text x="443" y="100" fill="currentColor" font-size="15">B1</text>
+              <circle cx="135" cy="382" r="8" fill="var(--plot-blue)"/>
+              <text x="151" y="388" fill="currentColor" font-size="14">Control</text>
+              <rect x="267" y="374" width="16" height="16" fill="var(--plot-orange)"/>
+              <text x="293" y="388" fill="currentColor" font-size="14">Treatment</text>
+              <path d="m435 372 10 19h-20Z" fill="var(--plot-red)"/>
+              <text x="457" y="388" fill="currentColor" font-size="14">Negative control</text>
+              <text x="644" y="58" fill="currentColor" font-size="14" font-style="italic">schematic only</text>
+            </svg>
+            <figcaption>
+              Nearby points have similar profiles under the selected representation and distance. Separation is
+              descriptive, not automatically a hypothesis test or evidence that treatment caused the difference.
+            </figcaption>
+          </figure>
+
+          <div class="callout warning">
+            <p class="callout-title">Ordination reporting checklist</p>
+            <ol>
+              <li>What representation and feature filtering were used?</li>
+              <li>Which distance measure was used?</li>
+              <li>How much information do the displayed axes represent?</li>
+              <li>Could subject, batch, depth, time, or another variable explain the pattern?</li>
+              <li>Which formal model, uncertainty measure, and study design support the claim?</li>
+            </ol>
+          </div>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#micro-alpha">&larr; Previous</a>
+            <a href="#micro-workflow">Next: Analysis workflow &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="micro-workflow">
+          <span class="chapter-number">Chapter 9</span>
+          <h2>Microbiome analysis workflow</h2>
+          <p>
+            Begin with the study question, measurement process, and structure of each data object before selecting
+            analytical or visualization methods.
+          </p>
+
+          <ol>
+            <li>Write the scientific question in one sentence.</li>
+            <li>Identify the count table’s row and column orientation.</li>
+            <li>Match sample and feature IDs across objects.</li>
+            <li>Inspect metadata, controls, batch, missingness, and possible confounders.</li>
+            <li>Calculate library sizes and examine their distribution.</li>
+            <li>Summarize prevalence and abundance without silently discarding features.</li>
+            <li>Choose and document filtering based on the question and design.</li>
+            <li>Choose a representation and distance appropriate to the target quantity.</li>
+            <li>Calculate within-sample or between-sample summaries.</li>
+            <li>Interpret results together with study design and uncertainty.</li>
+          </ol>
+
+          <h3>Build a long table for plotting</h3>
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Counts + sample metadata + taxonomy</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>count_feature_ids &lt;- setdiff(names(counts), "sample_id")
+
+unmatched_samples &lt;- anti_join(
+  counts |&gt; distinct(sample_id),
+  metadata |&gt; distinct(sample_id),
+  by = "sample_id"
+)
+unmatched_features &lt;- anti_join(
+  tibble(feature_id = count_feature_ids),
+  taxonomy |&gt; distinct(feature_id),
+  by = "feature_id"
+)
+
+stopifnot(nrow(unmatched_samples) == 0)
+stopifnot(nrow(unmatched_features) == 0)
+
+plot_data &lt;- counts |&gt;
+  pivot_longer(
+    -sample_id,
+    names_to = "feature_id",
+    values_to = "count"
+  ) |&gt;
+  left_join(metadata, by = "sample_id") |&gt;
+  left_join(taxonomy, by = "feature_id") |&gt;
+  group_by(sample_id) |&gt;
+  mutate(
+    library_size = sum(count),
+    relative_abundance = if_else(
+      library_size &gt; 0,
+      count / library_size,
+      NA_real_
+    )
+  ) |&gt;
+  ungroup()
+
+stopifnot(
+  nrow(plot_data) == nrow(counts) * (ncol(counts) - 1)
+)</code></pre>
+          </div>
+          <p>
+            The two <code>anti_join()</code> checks detect count-table IDs with no matching metadata or taxonomy record. The
+            final row-count check detects unexpected row multiplication; <code>ncol(counts) - 1</code> is the number of
+            feature columns after excluding <code>sample_id</code>. Never treat a successful join as proof that labels are correct.
+          </p>
+
+          <h3>Plot observed composition</h3>
+          <div class="code-block">
+            <div class="code-label"><span>R</span><span>Descriptive stacked bars</span></div>
+            <pre tabindex="0" aria-label="Scrollable code example"><code>plot_data |&gt;
+  filter(sample_type == "Biological") |&gt;
+  ggplot(
+    aes(
+      x = sample_id,
+      y = relative_abundance,
+      fill = feature_id
+    )
+  ) +
+  geom_col(width = 0.78) +
+  facet_grid(~ group, scales = "free_x", space = "free_x") +
+  scale_y_continuous(
+    labels = function(x) paste0(x * 100, "%")
+  ) +
+  labs(
+    title = "Observed composition by sample",
+    subtitle = "Synthetic tutorial data",
+    x = NULL,
+    y = "Relative abundance",
+    fill = "Feature"
+  ) +
+  theme_minimal(base_size = 12)</code></pre>
+          </div>
+          <p>
+            Stacked bars reveal dominant features and sample composition. They are weak for comparing thin segments across
+            many samples. For larger data, show only a declared set of features, combine the remainder as “Other,” and
+            preserve the full table for analysis.
+          </p>
+
+          <div class="callout check">
+            <p class="callout-title">Reporting observed composition</p>
+            <p>
+              Prefer: “In this synthetic dataset, treatment samples assign a larger observed share of reads to ASV3 than
+              control samples.” Avoid: “Treatment increased ASV3.” The second sentence makes a causal and absolute claim
+              that this tiny descriptive example cannot support.
+            </p>
+          </div>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#micro-beta">&larr; Previous</a>
+            <a href="#micro-practice">Next: Exercises and reference &rarr;</a>
+          </nav>
+        </section>
+
+        <section class="chapter" id="micro-practice">
+          <span class="chapter-number">Chapter 10</span>
+          <h2>Exercises and reference</h2>
+
+          <details>
+            <summary>Exercise 1: Describe S1 versus S2 in one precise sentence</summary>
+            <p>
+              S2 has twice the observed sequencing depth of S1, while the two samples have identical observed relative
+              compositions across the six features.
+            </p>
+          </details>
+
+          <details>
+            <summary>Exercise 2: Interpret ASV4 without overclaiming</summary>
+            <p>
+              ASV4 is detected only in negative control B1. This pattern warrants investigation for contamination or
+              another technical source, but this table alone does not prove the mechanism.
+            </p>
+          </details>
+
+          <details>
+            <summary>Exercise 3: Distinguish 0 from NA</summary>
+            <p>
+              A count of 0 means no read was observed for that sample-feature cell. <code>NA</code> means the value or
+              annotation is unavailable. For example, an unassigned genus label should be <code>NA</code>, not count 0.
+            </p>
+          </details>
+
+          <details>
+            <summary>Exercise 4: Why is raw-count Bray&ndash;Curtis nonzero for S1 versus S2?</summary>
+            <p>
+              S2’s counts are exactly twice S1’s, so the raw vectors differ in magnitude. Once each row is converted to
+              proportions, the profiles are identical and the dissimilarity is 0.
+            </p>
+          </details>
+
+          <details>
+            <summary>Synthesis exercise: Write three sentences about the dataset</summary>
+            <ol>
+              <li>One sentence about sequencing depth.</li>
+              <li>One sentence about Control and Treatment composition.</li>
+              <li>One sentence about zeros.</li>
+            </ol>
+            <p>
+              One valid answer: “S2 and S4 have twice the library sizes of S1 and S3, respectively. In this synthetic
+              dataset, treatment samples devote a larger observed proportion to ASV3 than control samples. The zero cells
+              cannot be classified as structural or sampling zeros from the table alone.”
+            </p>
+          </details>
+
+          <h3>Glossary</h3>
+          <dl class="definition-list">
+            <dt>Abundance</dt><dd>How much of a feature was observed under a stated representation.</dd>
+            <dt>Alpha diversity</dt><dd>Diversity summarized within one sample.</dd>
+            <dt>Beta diversity</dt><dd>Variation or dissimilarity among samples; always state the definition used.</dd>
+            <dt>Composition</dt><dd>Parts represented relative to a constrained whole.</dd>
+            <dt>Feature</dt><dd>The unit represented by a count-table row or column, such as an ASV or pathway.</dd>
+            <dt>Library size</dt><dd>Total retained reads observed for one sample.</dd>
+            <dt>Metadata</dt><dd>Variables describing samples, subjects, collection, or processing.</dd>
+            <dt>Ordination</dt><dd>A lower-dimensional display of multivariate relationships.</dd>
+            <dt>Prevalence</dt><dd>Proportion of samples in which a feature was detected.</dd>
+            <dt>Relative abundance</dt><dd>A feature count divided by the sample’s total count.</dd>
+            <dt>Sampling zero</dt><dd>A possibly present feature was not observed in finite sampling.</dd>
+            <dt>Structural zero</dt><dd>A feature is genuinely absent from the target community.</dd>
+            <dt>Taxonomy</dt><dd>Hierarchical labels assigned to microbial features.</dd>
+          </dl>
+
+          <div class="callout check">
+            <p class="callout-title">Learning outcomes</p>
+            <ul>
+              <li>connect count, metadata, and taxonomy tables by their identifiers;</li>
+              <li>distinguish library size from absolute microbial load;</li>
+              <li>explain why one observed zero does not identify its generating process;</li>
+              <li>state what relative abundance preserves and discards;</li>
+              <li>distinguish prevalence, alpha diversity, and between-sample dissimilarity; and</li>
+              <li>interpret ordination as a descriptive approximation rather than a causal conclusion.</li>
+            </ul>
+          </div>
+
+          <h3>References and further reading</h3>
+          <ul class="source-list">
+            <li><a href="https://www.nature.com/articles/nmeth.3869" target="_blank" rel="noopener noreferrer">Callahan et al. (2016)</a> &mdash; exact sequence inference and ASVs with DADA2.</li>
+            <li><a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0061217" target="_blank" rel="noopener noreferrer">McMurdie and Holmes (2013)</a> &mdash; organizing linked microbiome data objects in phyloseq.</li>
+            <li><a href="https://www.nature.com/articles/nature24460" target="_blank" rel="noopener noreferrer">Vandeputte et al. (2017)</a> &mdash; relative versus quantitative microbiome profiling.</li>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5682008/" target="_blank" rel="noopener noreferrer">Kaul et al. (2017)</a> &mdash; microbiome data with excess and structural zeros.</li>
+            <li><a href="https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2022.728146/full" target="_blank" rel="noopener noreferrer">Schmidt et al. (2022)</a> &mdash; sampling, structural, and missing zeros in diversity analysis.</li>
+            <li><a href="https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2017.02224/full" target="_blank" rel="noopener noreferrer">Gloor et al. (2017)</a> &mdash; why microbiome datasets are compositional.</li>
+            <li><a href="https://link.springer.com/article/10.1186/s40168-017-0237-y" target="_blank" rel="noopener noreferrer">Weiss et al. (2017)</a> &mdash; how normalization choices interact with data characteristics.</li>
+            <li><a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003531" target="_blank" rel="noopener noreferrer">McMurdie and Holmes (2014)</a> &mdash; tradeoffs in normalizing microbiome count data.</li>
+            <li><a href="https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1943563" target="_blank" rel="noopener noreferrer">Whittaker (1960)</a> &mdash; foundational alpha- and beta-diversity concepts.</li>
+            <li><a href="https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1942268" target="_blank" rel="noopener noreferrer">Bray and Curtis (1957)</a> &mdash; the dissimilarity used in the worked example.</li>
+            <li><a href="https://academic.oup.com/biomet/article-abstract/53/3-4/325/246598" target="_blank" rel="noopener noreferrer">Gower (1966)</a> &mdash; principal coordinates analysis.</li>
+            <li><a href="https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.2517-6161.1982.tb01195.x" target="_blank" rel="noopener noreferrer">Aitchison (1982)</a> &mdash; statistical analysis of compositional data.</li>
+            <li><a href="https://journals.asm.org/doi/10.1128/aem.71.12.8228-8235.2005" target="_blank" rel="noopener noreferrer">Lozupone and Knight (2005)</a> &mdash; UniFrac and phylogenetic comparison.</li>
+          </ul>
+
+          <nav class="chapter-nav" aria-label="Chapter navigation">
+            <a href="#micro-workflow">&larr; Previous</a>
+            <a href="../">Open R Foundations &rarr;</a>
+          </nav>
+        </section>
+      </main>
+    </div>
+
+    <footer class="page-footer">
+      <div class="footer-inner">
+        <p>Cycle 2026 Tutorials &middot; <a href="../../">Yiqian Zhang</a> &middot; <a href="https://math.osu.edu/cycle" target="_blank" rel="noopener noreferrer">OSU Cycle</a></p>
+      </div>
+    </footer>
+  </body>
+</html>
