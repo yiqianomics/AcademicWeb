@@ -106,7 +106,7 @@
           <div class="research-copy">
             <p class="eyebrow">Research</p>
             <h2 id="research-heading">Measuring diversity in microbial communities</h2>
-            <p>I work on statistical methods for microbiome data. I’m especially interested in how we compare samples when a few microbes are abundant and many others go undetected. I enjoy working through the math behind these comparisons and turning it into software that other researchers can use on their own data.</p>
+            <p>I develop statistical methods for comparing microbial communities. I’m interested in differences that are easy to miss when we look only at averages. For example, two groups of people can have similar gut microbial diversity on average, even when it varies much more from person to person in one group. I also study how rare microbes influence comparisons between samples.</p>
           </div>
           <figure class="simplex-plate">
             <figcaption>Inverse Simpson diversity</figcaption>
@@ -129,6 +129,50 @@
             <span class="publication-count" id="publication-count" aria-live="polite">Showing 5 of 5 publications</span>
           </div>
           <div class="publication-list">
+            <article class="publication" data-topic="microbiome" aria-labelledby="paper-koinetic">
+              <div class="publication-body">
+                <header class="publication-header">
+                  <h3 class="publication-title" id="paper-koinetic">
+                    <a href="https://doi.org/10.1093/bib/bbag632" target="_blank" rel="noopener noreferrer">
+                      Koinetic: a graph-based distance as a new ecological metric for microbial community differential analysis
+                    </a>
+                  </h3>
+                  <p class="publication-authors">
+                    Z. Zhu, <strong>Y. Zhang</strong>, R. Liu, Y. Duan, W. Li, Z. Huang, X. Chen, and L. Zhang
+                  </p>
+                  <p class="publication-venue"><em>Briefings in Bioinformatics</em>, vol. 27, issue 6, bbag632 (<time datetime="2026-11-15">15 Nov 2026</time>).</p>
+                  <div class="publication-meta">
+                    <span class="tag published">Published</span>
+                    <a href="https://doi.org/10.1093/bib/bbag632" target="_blank" rel="noopener noreferrer">DOI: 10.1093/bib/bbag632</a>
+                  </div>
+                </header>
+                <details class="publication-disclosure">
+                  <summary>Abstract</summary>
+                  <div class="publication-details publication-details--text">
+                    <div class="publication-abstract">
+                      <p>
+                        Phylogeny-aware beta diversity measures are essential in microbiome research, yet widely used metrics such as
+                        UniFrac and its variants rely on independent branch length contributions and do not satisfy the Euclidean
+                        property, leading to distortions in ordination and kernel-based tests. These limitations underscore the need
+                        for a distance that is both phylogenetically coherent and geometrically valid. We introduce the Koinos Kinetic
+                        Distance (Koinetic), a phylogeny-aware dissimilarity that views microbial communities as interconnected
+                        assemblies rather than isolated taxa. &ldquo;Koinos&rdquo; emphasizes collective evaluation, while
+                        &ldquo;kinetic&rdquo; reflects how differences propagate dynamically across ecological networks and phylogenetic
+                        lineages. Koinetic leverages a graph Laplacian–based kernel to weight community differences by shared
+                        phylogeny, capturing ecological connectivity and clade relatedness. This design ensures Euclidean validity and
+                        enables seamless integration with kernel-based methods as well as geometry-preserving ordination. We
+                        demonstrate the effectiveness of Koinetic through a combination of controlled simulation studies and applications to eight
+                        microbiome datasets spanning pancreatic cancer, IBD, and metabolic disease–associated oral microbiomes.
+                        Compared to classical and phylogenetic metrics, including weighted, unweighted, and generalized UniFrac,
+                        Koinetic achieves superior preservation of geometry under dimensionality reduction and improved clustering.
+                        It bridges phylogeny-aware metrics with kernel-compatible representations, thereby providing a general foundation for
+                        phylogeny-aware analysis.
+                      </p>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </article>
             <article class="publication" data-topic="diversity-analysis" aria-labelledby="paper-deshape">
               <div class="publication-body">
                 <header class="publication-header">
@@ -154,51 +198,6 @@
                         approximately calibrated type I error and strong power for dispersion effects, with more gradual sensitivity
                         to asymmetry. Applications to pancreatic cancer, cardiovascular disease, and seasonal diet microbiome
                         datasets reveal distributional differences that conventional &alpha;-diversity tests do not isolate.
-                      </p>
-                    </div>
-                  </div>
-                </details>
-              </div>
-            </article>
-            <article class="publication" data-topic="microbiome" aria-labelledby="paper-koinetic">
-              <div class="publication-body">
-                <header class="publication-header">
-                  <h3 class="publication-title" id="paper-koinetic">
-                    <a href="https://doi.org/10.1093/bib/bbag632" target="_blank" rel="noopener noreferrer">
-                      Koinetic: A Graph-based Distance as a New Ecological Metric for Microbial Community Differential Analysis
-                    </a>
-                  </h3>
-                  <p class="publication-authors">
-                    Z. Zhu, <strong>Y. Zhang</strong>, R. Liu, W. Li, Z. Huang, X. Chen, Y. Duan, and L. Zhang*
-                  </p>
-                  <p class="publication-venue"><em>Briefings in Bioinformatics</em> (<time datetime="2026">2026</time>).</p>
-                  <div class="publication-meta">
-                    <span class="tag published">Published</span>
-                    <a href="https://doi.org/10.1093/bib/bbag632" target="_blank" rel="noopener noreferrer">DOI: 10.1093/bib/bbag632</a>
-                    <span class="publication-note">Publisher metadata pending</span>
-                  </div>
-                </header>
-                <details class="publication-disclosure">
-                  <summary>Abstract</summary>
-                  <div class="publication-details publication-details--text">
-                    <div class="publication-abstract">
-                      <p>
-                        Phylogeny-aware beta diversity measures are essential in microbiome research, yet widely used metrics such as
-                        UniFrac and its variants rely on independent branch length contributions and do not satisfy the Euclidean
-                        property, leading to distortions in ordination and kernel-based tests. These limitations underscore the need
-                        for a distance that is both phylogenetically coherent and geometrically valid. We introduce the Koinos Kinetic
-                        Distance (Koinetic), a phylogeny-aware dissimilarity that views microbial communities as interconnected
-                        assemblies rather than isolated taxa. &ldquo;Koinos&rdquo; emphasizes collective evaluation, while
-                        &ldquo;kinetic&rdquo; reflects how differences propagate dynamically across ecological networks and phylogenetic
-                        lineages. Koinetic leverages a graph Laplacian–based kernel to weight community differences by shared
-                        phylogeny, capturing ecological connectivity and clade relatedness. This design ensures Euclidean validity and
-                        enables seamless integration with kernel-based methods as well as geometry-preserving ordination. We
-                        demonstrate the effectiveness of Koinetic through a combination of controlled simulation studies and applications to eight
-                        microbiome datasets spanning pancreatic cancer, IBD, and metabolic disease–associated oral microbiomes.
-                        Compared to classical and phylogenetic metrics, including weighted, unweighted, and generalized UniFrac,
-                        Koinetic achieves superior preservation of geometry under dimensionality reduction and improved clustering.
-                        It bridges phylogeny-aware metrics with kernel-compatible representations, thereby providing a general foundation for
-                        phylogeny-aware analysis.
                       </p>
                     </div>
                   </div>
